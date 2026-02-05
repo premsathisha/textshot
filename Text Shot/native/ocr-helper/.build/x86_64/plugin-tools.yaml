@@ -1,0 +1,66 @@
+client:
+  name: basic
+  file-system: device-agnostic
+tools: {}
+targets:
+  "PackageStructure": ["<PackageStructure>"]
+  "main": ["<ocr-helper-x86_64-apple-macosx26.0-release.exe>","<ocr-helper-x86_64-apple-macosx26.0-release.module>"]
+  "ocr-helper-x86_64-apple-macosx26.0-release.exe": ["<ocr-helper-x86_64-apple-macosx26.0-release.exe>"]
+  "ocr-helper-x86_64-apple-macosx26.0-release.module": ["<ocr-helper-x86_64-apple-macosx26.0-release.module>"]
+  "test": ["<ocr-helper-x86_64-apple-macosx26.0-release.exe>","<ocr-helper-x86_64-apple-macosx26.0-release.module>"]
+default: "main"
+nodes:
+  "/Users/premsathishaetagi/Documents/Codex/Text Shot/native/ocr-helper/Sources/ocr-helper/":
+    is-directory-structure: true
+    content-exclusion-patterns: [".git",".build"]
+commands:
+  "/Users/premsathishaetagi/Documents/Codex/Text Shot/native/ocr-helper/.build/x86_64/x86_64-apple-macosx/release/ocr-helper.product/Objects.LinkFileList":
+    tool: write-auxiliary-file
+    inputs: ["<link-file-list>","/Users/premsathishaetagi/Documents/Codex/Text Shot/native/ocr-helper/.build/x86_64/x86_64-apple-macosx/release/ocr_helper.build/main.swift.o"]
+    outputs: ["/Users/premsathishaetagi/Documents/Codex/Text Shot/native/ocr-helper/.build/x86_64/x86_64-apple-macosx/release/ocr-helper.product/Objects.LinkFileList"]
+    description: "Write auxiliary file /Users/premsathishaetagi/Documents/Codex/Text Shot/native/ocr-helper/.build/x86_64/x86_64-apple-macosx/release/ocr-helper.product/Objects.LinkFileList"
+
+  "/Users/premsathishaetagi/Documents/Codex/Text Shot/native/ocr-helper/.build/x86_64/x86_64-apple-macosx/release/ocr_helper.build/sources":
+    tool: write-auxiliary-file
+    inputs: ["<sources-file-list>","/Users/premsathishaetagi/Documents/Codex/Text Shot/native/ocr-helper/Sources/ocr-helper/main.swift"]
+    outputs: ["/Users/premsathishaetagi/Documents/Codex/Text Shot/native/ocr-helper/.build/x86_64/x86_64-apple-macosx/release/ocr_helper.build/sources"]
+    description: "Write auxiliary file /Users/premsathishaetagi/Documents/Codex/Text Shot/native/ocr-helper/.build/x86_64/x86_64-apple-macosx/release/ocr_helper.build/sources"
+
+  "/Users/premsathishaetagi/Documents/Codex/Text Shot/native/ocr-helper/.build/x86_64/x86_64-apple-macosx/release/swift-version--1AB21518FC5DEDBE.txt":
+    tool: write-auxiliary-file
+    inputs: ["<swift-get-version>","/Library/Developer/CommandLineTools/usr/bin/swiftc"]
+    outputs: ["/Users/premsathishaetagi/Documents/Codex/Text Shot/native/ocr-helper/.build/x86_64/x86_64-apple-macosx/release/swift-version--1AB21518FC5DEDBE.txt"]
+    always-out-of-date: "true"
+    description: "Write auxiliary file /Users/premsathishaetagi/Documents/Codex/Text Shot/native/ocr-helper/.build/x86_64/x86_64-apple-macosx/release/swift-version--1AB21518FC5DEDBE.txt"
+
+  "<ocr-helper-x86_64-apple-macosx26.0-release.exe>":
+    tool: phony
+    inputs: ["/Users/premsathishaetagi/Documents/Codex/Text Shot/native/ocr-helper/.build/x86_64/x86_64-apple-macosx/release/ocr-helper"]
+    outputs: ["<ocr-helper-x86_64-apple-macosx26.0-release.exe>"]
+
+  "<ocr-helper-x86_64-apple-macosx26.0-release.module>":
+    tool: phony
+    inputs: ["/Users/premsathishaetagi/Documents/Codex/Text Shot/native/ocr-helper/.build/x86_64/x86_64-apple-macosx/release/ocr_helper.build/main.swift.o","/Users/premsathishaetagi/Documents/Codex/Text Shot/native/ocr-helper/.build/x86_64/x86_64-apple-macosx/release/Modules/ocr_helper.swiftmodule"]
+    outputs: ["<ocr-helper-x86_64-apple-macosx26.0-release.module>"]
+
+  "C.ocr-helper-x86_64-apple-macosx26.0-release.exe":
+    tool: shell
+    inputs: ["/Users/premsathishaetagi/Documents/Codex/Text Shot/native/ocr-helper/.build/x86_64/x86_64-apple-macosx/release/ocr_helper.build/main.swift.o","/Users/premsathishaetagi/Documents/Codex/Text Shot/native/ocr-helper/.build/x86_64/x86_64-apple-macosx/release/ocr-helper.product/Objects.LinkFileList"]
+    outputs: ["/Users/premsathishaetagi/Documents/Codex/Text Shot/native/ocr-helper/.build/x86_64/x86_64-apple-macosx/release/ocr-helper"]
+    description: "Linking ./.build/x86_64/x86_64-apple-macosx/release/ocr-helper"
+    args: ["/Library/Developer/CommandLineTools/usr/bin/swiftc","-L","/Users/premsathishaetagi/Documents/Codex/Text Shot/native/ocr-helper/.build/x86_64/x86_64-apple-macosx/release","-o","/Users/premsathishaetagi/Documents/Codex/Text Shot/native/ocr-helper/.build/x86_64/x86_64-apple-macosx/release/ocr-helper","-module-name","ocr_helper","-Xlinker","-no_warn_duplicate_libraries","-emit-executable","-Xlinker","-dead_strip","-Xlinker","-alias","-Xlinker","_ocr_helper_main","-Xlinker","_main","-Xlinker","-rpath","-Xlinker","@loader_path","@/Users/premsathishaetagi/Documents/Codex/Text Shot/native/ocr-helper/.build/x86_64/x86_64-apple-macosx/release/ocr-helper.product/Objects.LinkFileList","-Xlinker","-rpath","-Xlinker","/Library/Developer/CommandLineTools/usr/lib/swift-6.2/macosx","-target","x86_64-apple-macosx13.0","-framework","Vision","-framework","AppKit","-I","/Library/Developer/CommandLineTools/Library/Developer/Frameworks","-L","/Library/Developer/CommandLineTools/Library/Developer/Frameworks","-plugin-path","/Library/Developer/CommandLineTools/usr/lib/swift/host/plugins/testing","-sdk","/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk","-g"]
+
+  "C.ocr-helper-x86_64-apple-macosx26.0-release.module":
+    tool: shell
+    inputs: ["/Users/premsathishaetagi/Documents/Codex/Text Shot/native/ocr-helper/Sources/ocr-helper/main.swift","/Users/premsathishaetagi/Documents/Codex/Text Shot/native/ocr-helper/.build/x86_64/x86_64-apple-macosx/release/swift-version--1AB21518FC5DEDBE.txt","/Users/premsathishaetagi/Documents/Codex/Text Shot/native/ocr-helper/.build/x86_64/x86_64-apple-macosx/release/ocr_helper.build/sources"]
+    outputs: ["/Users/premsathishaetagi/Documents/Codex/Text Shot/native/ocr-helper/.build/x86_64/x86_64-apple-macosx/release/ocr_helper.build/main.swift.o","/Users/premsathishaetagi/Documents/Codex/Text Shot/native/ocr-helper/.build/x86_64/x86_64-apple-macosx/release/Modules/ocr_helper.swiftmodule"]
+    description: "Compiling Swift Module 'ocr_helper' (1 sources)"
+    args: ["/Library/Developer/CommandLineTools/usr/bin/swiftc","-module-name","ocr_helper","-emit-dependencies","-emit-module","-emit-module-path","/Users/premsathishaetagi/Documents/Codex/Text Shot/native/ocr-helper/.build/x86_64/x86_64-apple-macosx/release/Modules/ocr_helper.swiftmodule","-output-file-map","/Users/premsathishaetagi/Documents/Codex/Text Shot/native/ocr-helper/.build/x86_64/x86_64-apple-macosx/release/ocr_helper.build/output-file-map.json","-whole-module-optimization","-num-threads","12","-c","@/Users/premsathishaetagi/Documents/Codex/Text Shot/native/ocr-helper/.build/x86_64/x86_64-apple-macosx/release/ocr_helper.build/sources","-I","/Users/premsathishaetagi/Documents/Codex/Text Shot/native/ocr-helper/.build/x86_64/x86_64-apple-macosx/release/Modules","-target","x86_64-apple-macosx13.0","-whole-module-optimization","-num-threads","12","-serialize-diagnostics","-O","-j12","-DSWIFT_PACKAGE","-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE","-module-cache-path","/Users/premsathishaetagi/Documents/Codex/Text Shot/native/ocr-helper/.build/x86_64/x86_64-apple-macosx/release/ModuleCache","-parseable-output","-Xfrontend","-entry-point-function-name","-Xfrontend","ocr_helper_main","-color-diagnostics","-swift-version","5","-I","/Library/Developer/CommandLineTools/Library/Developer/Frameworks","-L","/Library/Developer/CommandLineTools/Library/Developer/Frameworks","-plugin-path","/Library/Developer/CommandLineTools/usr/lib/swift/host/plugins/testing","-sdk","/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk","-g","-Xcc","-isysroot","-Xcc","/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk","-Xcc","-fPIC","-Xcc","-g","-package-name","ocr_helper"]
+
+  "PackageStructure":
+    tool: package-structure-tool
+    inputs: ["/Users/premsathishaetagi/Documents/Codex/Text Shot/native/ocr-helper/Sources/ocr-helper/","/Users/premsathishaetagi/Documents/Codex/Text Shot/native/ocr-helper/Package.swift","/Users/premsathishaetagi/Documents/Codex/Text Shot/native/ocr-helper/Package.resolved"]
+    outputs: ["<PackageStructure>"]
+    description: "Planning build"
+    allow-missing-inputs: true
+

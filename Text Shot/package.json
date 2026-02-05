@@ -1,0 +1,59 @@
+{
+  "name": "rapidlens-ocr",
+  "productName": "RapidLens OCR",
+  "version": "0.1.0",
+  "description": "Fast macOS background OCR utility",
+  "main": "dist/main/main.js",
+  "author": "",
+  "license": "UNLICENSED",
+  "scripts": {
+    "clean": "rm -rf dist bin release",
+    "build": "npm run clean && npm run build:ts && npm run copy:renderer && npm run build:helper && npm run copy:helper",
+    "build:ts": "tsc -p tsconfig.json",
+    "copy:renderer": "mkdir -p dist/renderer && cp src/renderer/settings.html src/renderer/settings.css dist/renderer/",
+    "build:helper": "bash scripts/build-helper.sh",
+    "copy:helper": "bash scripts/copy-helper.sh",
+    "dev": "npm run build:ts && electron .",
+    "start": "electron .",
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "dist": "npm run build && electron-builder --mac"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "electron": "^34.0.0",
+    "electron-builder": "^25.1.8",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  },
+  "build": {
+    "extends": null,
+    "appId": "com.premsathisha.rapidlens",
+    "productName": "RapidLens OCR",
+    "files": [
+      "dist/**/*",
+      "assets/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "bin/ocr-helper",
+        "to": "bin/ocr-helper"
+      }
+    ],
+    "mac": {
+      "category": "public.app-category.productivity",
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "hardenedRuntime": true,
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.inherit.plist",
+      "extendInfo": {
+        "LSUIElement": true
+      }
+    },
+    "afterSign": "scripts/notarize.js"
+  }
+}
