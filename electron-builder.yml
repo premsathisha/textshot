@@ -21,3 +21,9 @@ extraResources:
   - from: bin/text-shot-settings
     to: bin/text-shot-settings
 afterSign: scripts/notarize.js
+generateUpdatesFilesForAllChannels: true
+publish:
+  - provider: github
+    owner: premsathisha
+    repo: textshot
+    releaseType: release

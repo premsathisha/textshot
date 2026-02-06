@@ -1,7 +1,12 @@
 import { Menu, Tray, app, nativeImage } from 'electron';
 import path from 'node:path';
 
-export function createTray(onCapture: () => void, onOpenSettings: () => void, onQuit: () => void): Tray {
+export function createTray(
+  onCapture: () => void,
+  onOpenSettings: () => void,
+  onCheckForUpdates: () => void,
+  onQuit: () => void
+): Tray {
   const imagePath = path.join(app.getAppPath(), 'assets', 'trayTemplate.png');
   const icon = nativeImage.createFromPath(imagePath);
   const tray = new Tray(icon.isEmpty() ? nativeImage.createEmpty() : icon);
@@ -12,6 +17,7 @@ export function createTray(onCapture: () => void, onOpenSettings: () => void, on
     { label: 'Capture Text', click: onCapture },
     { type: 'separator' },
     { label: 'Settings', click: onOpenSettings },
+    { label: 'Check for Updates', click: onCheckForUpdates },
     { type: 'separator' },
     { label: 'Quit', click: onQuit }
   ]);

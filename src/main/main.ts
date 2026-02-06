@@ -7,10 +7,11 @@ import { registerHotkey, unregisterHotkeys } from './hotkey';
 import { captureRegion } from './capture';
 import { runOcrWithRetry } from './ocr';
 import { SettingsStore } from './settings-store';
-import { pulseTray } from './feedback';
+import { disposeFeedbackToast, showFeedbackToast } from './feedback';
 import { registerIpc } from './ipc';
 import { shouldThrottle, showAccessibilityPrompt, showScreenRecordingPrompt } from './permissions';
 import { buildNativeSettingsArgs, resolveNativeSettingsBinaryPath } from './native-settings';
+import { configureAutoUpdater } from './updater';
 
 let settingsWindow: BrowserWindow | null = null;
 let tray = null as ReturnType<typeof createTray> | null;
@@ -119,8 +120,8 @@ async function runCaptureFlow(): Promise<void> {
     const ocr = await runOcrWithRetry(captured.path);
 
     if (!ocr || ocr.text.trim().length === 0) {
-      if (settings.showConfirmation && tray) {
-        await pulseTray(tray, 'No text');
+      if (settings.showConfirmation) {
+        await showFeedbackToast('No text');
       }
       return;
     }
@@ -141,12 +142,12 @@ async function runCaptureFlow(): Promise<void> {
       }
     }
 
-    if (settings.showConfirmation && tray) {
-      await pulseTray(tray, 'Copied');
+    if (settings.showConfirmation) {
+      await showFeedbackToast('Copied!');
     }
   } catch {
-    if (settings.showConfirmation && tray) {
-      await pulseTray(tray, 'Error');
+    if (settings.showConfirmation) {
+      await showFeedbackToast('Error');
     }
   } finally {
     const latest = store.get();
@@ -173,12 +174,20 @@ function bootstrap(): void {
     app.dock.hide();
   }
 
+  const updater = configureAutoUpdater({
+    autoCheckOnLaunch: process.env.TEXT_SHOT_AUTO_UPDATE_ON_LAUNCH !== 'false',
+    includePrerelease: process.env.TEXT_SHOT_INCLUDE_PRERELEASE_UPDATES === 'true'
+  });
+
   tray = createTray(
     () => void runCaptureFlow(),
     () => {
       if (!openNativeSettings()) {
         createSettingsWindow();
       }
+    },
+    () => {
+      void updater.checkForUpdates({ manual: true });
     },
     () => app.quit()
   );
@@ -194,11 +203,16 @@ function bootstrap(): void {
     onHotkeyChange: applyHotkey,
     getSettingsWindow: () => settingsWindow
   });
+
+  if (updater.checkOnLaunch) {
+    void updater.checkForUpdates();
+  }
 }
 
 app.whenReady().then(bootstrap);
 
 app.on('will-quit', () => {
+  disposeFeedbackToast();
   unregisterHotkeys();
 });
 

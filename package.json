@@ -19,7 +19,11 @@
     "start": "electron .",
     "test": "vitest run",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "dist": "npm run build && electron-builder --mac"
+    "dist": "npm run build && electron-builder --mac",
+    "dist:publish": "npm run build && electron-builder --mac --publish always"
+  },
+  "dependencies": {
+    "electron-updater": "^6.6.2"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",
@@ -61,6 +65,15 @@
         "LSUIElement": true
       }
     },
-    "afterSign": "scripts/notarize.js"
+    "afterSign": "scripts/notarize.js",
+    "generateUpdatesFilesForAllChannels": true,
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "premsathisha",
+        "repo": "textshot",
+        "releaseType": "release"
+      }
+    ]
   }
 }
