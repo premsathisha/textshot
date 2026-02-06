@@ -1,26 +1,8 @@
 import { app } from 'electron';
-import fs from 'node:fs';
 import path from 'node:path';
+import { AppSettings, readSettingsFile, updateSettingsFile } from './settings-file';
 
-export type AppSettings = {
-  hotkey: string;
-  showConfirmation: boolean;
-  launchAtLogin: boolean;
-  debugMode: boolean;
-  autoPaste: boolean;
-  lastPermissionPromptAt: number;
-  lastAccessibilityPromptAt: number;
-};
-
-const DEFAULT_SETTINGS: AppSettings = {
-  hotkey: 'CommandOrControl+Shift+2',
-  showConfirmation: true,
-  launchAtLogin: false,
-  debugMode: false,
-  autoPaste: false,
-  lastPermissionPromptAt: 0,
-  lastAccessibilityPromptAt: 0
-};
+export type { AppSettings };
 
 export class SettingsStore {
   private readonly filePath: string;
@@ -28,29 +10,24 @@ export class SettingsStore {
 
   constructor() {
     this.filePath = path.join(app.getPath('userData'), 'settings.json');
-    this.settings = this.read();
+    this.settings = readSettingsFile(this.filePath);
   }
 
   get(): AppSettings {
     return { ...this.settings };
   }
 
+  getFilePath(): string {
+    return this.filePath;
+  }
+
   update(partial: Partial<AppSettings>): AppSettings {
-    const merged = { ...this.settings, ...partial };
-    this.settings = {
-      ...merged,
-      hotkey: merged.hotkey || DEFAULT_SETTINGS.hotkey
-    };
-    fs.writeFileSync(this.filePath, JSON.stringify(this.settings, null, 2));
+    this.settings = updateSettingsFile(this.filePath, partial);
     return this.get();
   }
 
-  private read(): AppSettings {
-    try {
-      const raw = fs.readFileSync(this.filePath, 'utf8');
-      return { ...DEFAULT_SETTINGS, ...JSON.parse(raw) };
-    } catch {
-      return { ...DEFAULT_SETTINGS };
-    }
+  reloadFromDisk(): AppSettings {
+    this.settings = readSettingsFile(this.filePath);
+    return this.get();
   }
 }

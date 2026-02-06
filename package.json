@@ -8,11 +8,13 @@
   "license": "UNLICENSED",
   "scripts": {
     "clean": "rm -rf dist bin release",
-    "build": "npm run clean && npm run build:ts && npm run copy:renderer && npm run build:helper && npm run copy:helper",
+    "build": "npm run clean && npm run build:ts && npm run copy:renderer && npm run build:helper && npm run copy:helper && npm run build:settings-app && npm run copy:settings-app",
     "build:ts": "tsc -p tsconfig.json",
     "copy:renderer": "mkdir -p dist/renderer && cp src/renderer/settings.html src/renderer/settings.css dist/renderer/",
     "build:helper": "bash scripts/build-helper.sh",
     "copy:helper": "bash scripts/copy-helper.sh",
+    "build:settings-app": "bash scripts/build-settings-app.sh",
+    "copy:settings-app": "bash scripts/copy-settings-app.sh",
     "dev": "npm run build:ts && electron .",
     "start": "electron .",
     "test": "vitest run",
@@ -39,6 +41,10 @@
       {
         "from": "bin/ocr-helper",
         "to": "bin/ocr-helper"
+      },
+      {
+        "from": "bin/text-shot-settings",
+        "to": "bin/text-shot-settings"
       }
     ],
     "mac": {

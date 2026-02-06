@@ -1,7 +1,7 @@
 import { app, BrowserWindow, clipboard, ipcMain } from 'electron';
 import fs from 'node:fs';
 import path from 'node:path';
-import { spawn } from 'node:child_process';
+import { ChildProcess, spawn } from 'node:child_process';
 import { createTray } from './tray';
 import { registerHotkey, unregisterHotkeys } from './hotkey';
 import { captureRegion } from './capture';
@@ -10,10 +10,12 @@ import { SettingsStore } from './settings-store';
 import { pulseTray } from './feedback';
 import { registerIpc } from './ipc';
 import { shouldThrottle, showAccessibilityPrompt, showScreenRecordingPrompt } from './permissions';
+import { buildNativeSettingsArgs, resolveNativeSettingsBinaryPath } from './native-settings';
 
 let settingsWindow: BrowserWindow | null = null;
 let tray = null as ReturnType<typeof createTray> | null;
 let lastCopiedText = '';
+let nativeSettingsProcess: ChildProcess | null = null;
 const store = new SettingsStore();
 
 function createSettingsWindow(): void {
@@ -41,6 +43,54 @@ function createSettingsWindow(): void {
   settingsWindow.on('closed', () => {
     settingsWindow = null;
   });
+}
+
+function applyPersistedSettings(): void {
+  store.reloadFromDisk();
+  applyHotkey();
+
+  if (app.isPackaged) {
+    app.setLoginItemSettings({ openAtLogin: store.get().launchAtLogin });
+  }
+
+  const win = settingsWindow;
+  if (win && !win.isDestroyed()) {
+    win.webContents.send('settings:changed', store.get());
+  }
+}
+
+function openNativeSettings(): boolean {
+  if (nativeSettingsProcess && nativeSettingsProcess.exitCode === null) {
+    return true;
+  }
+
+  const binaryPath = resolveNativeSettingsBinaryPath({
+    isPackaged: app.isPackaged,
+    resourcesPath: process.resourcesPath,
+    appPath: app.getAppPath()
+  });
+  if (!binaryPath) return false;
+
+  try {
+    nativeSettingsProcess = spawn(binaryPath, buildNativeSettingsArgs(store.getFilePath()), {
+      stdio: 'ignore'
+    });
+  } catch {
+    nativeSettingsProcess = null;
+    return false;
+  }
+
+  nativeSettingsProcess.once('error', () => {
+    nativeSettingsProcess = null;
+    createSettingsWindow();
+  });
+
+  nativeSettingsProcess.once('close', () => {
+    nativeSettingsProcess = null;
+    applyPersistedSettings();
+  });
+
+  return true;
 }
 
 async function maybeAutoPaste(): Promise<boolean> {
@@ -125,7 +175,11 @@ function bootstrap(): void {
 
   tray = createTray(
     () => void runCaptureFlow(),
-    () => createSettingsWindow(),
+    () => {
+      if (!openNativeSettings()) {
+        createSettingsWindow();
+      }
+    },
     () => app.quit()
   );
 
