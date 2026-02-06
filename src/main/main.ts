@@ -28,7 +28,7 @@ function createSettingsWindow(): void {
     resizable: false,
     maximizable: false,
     minimizable: false,
-    title: 'RapidLens OCR Settings',
+    title: 'Text Shot Settings',
     webPreferences: {
       preload: path.join(__dirname, '../preload/settings-preload.js'),
       contextIsolation: true,
@@ -130,7 +130,9 @@ function bootstrap(): void {
   );
 
   applyHotkey();
-  app.setLoginItemSettings({ openAtLogin: store.get().launchAtLogin });
+  if (app.isPackaged) {
+    app.setLoginItemSettings({ openAtLogin: store.get().launchAtLogin });
+  }
 
   registerIpc({
     ipcMain,

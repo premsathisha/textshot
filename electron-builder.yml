@@ -1,6 +1,7 @@
-appId: com.premsathisha.rapidlens
-productName: RapidLens OCR
+appId: com.premsathisha.textshot
+productName: Text Shot
 mac:
+  icon: assets/app-icon.png
   category: public.app-category.productivity
   target:
     - dmg
@@ -12,6 +13,7 @@ mac:
     LSUIElement: true
 files:
   - dist/**/*
+  - assets/**/*
   - package.json
 extraResources:
   - from: bin/ocr-helper

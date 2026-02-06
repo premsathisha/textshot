@@ -5,7 +5,7 @@ export function createTray(onCapture: () => void, onOpenSettings: () => void, on
   const imagePath = path.join(app.getAppPath(), 'assets', 'trayTemplate.png');
   const icon = nativeImage.createFromPath(imagePath);
   const tray = new Tray(icon.isEmpty() ? nativeImage.createEmpty() : icon);
-  tray.setToolTip('RapidLens OCR');
+  tray.setToolTip('Text Shot');
   tray.setTitle('');
 
   const menu = Menu.buildFromTemplate([

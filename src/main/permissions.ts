@@ -9,7 +9,7 @@ export async function showScreenRecordingPrompt(): Promise<void> {
     noLink: true,
     title: 'Screen Recording Required',
     message: 'Enable Screen Recording to use this app.',
-    detail: 'System Settings -> Privacy & Security -> Screen Recording\n\nIf the shortcut works, grant access to RapidLens OCR and try again.'
+    detail: 'System Settings -> Privacy & Security -> Screen Recording\n\nIf the shortcut works, grant access to Text Shot and try again.'
   });
 
   if (response.response === 0) {
@@ -26,7 +26,7 @@ export async function showAccessibilityPrompt(): Promise<void> {
     noLink: true,
     title: 'Accessibility Required',
     message: 'Enable Accessibility to use auto-paste.',
-    detail: 'System Settings -> Privacy & Security -> Accessibility\n\nGrant access to RapidLens OCR to allow automatic Cmd+V.'
+    detail: 'System Settings -> Privacy & Security -> Accessibility\n\nGrant access to Text Shot to allow automatic Cmd+V.'
   });
 
   if (response.response === 0) {

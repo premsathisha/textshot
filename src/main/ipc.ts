@@ -14,7 +14,9 @@ export function registerIpc({ ipcMain, store, onHotkeyChange, getSettingsWindow 
 
   ipcMain.handle('settings:update', (_event, partial) => {
     const next = store.update(partial || {});
-    app.setLoginItemSettings({ openAtLogin: next.launchAtLogin });
+    if (app.isPackaged) {
+      app.setLoginItemSettings({ openAtLogin: next.launchAtLogin });
+    }
     onHotkeyChange();
 
     const win = getSettingsWindow();

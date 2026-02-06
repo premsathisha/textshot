@@ -1,4 +1,4 @@
-# RapidLens OCR
+# Text Shot
 
 Menu bar macOS utility for fast region OCR: hotkey -> drag capture -> local Vision OCR -> clipboard copy.
 

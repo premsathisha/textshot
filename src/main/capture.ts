@@ -10,7 +10,7 @@ export type CaptureResult = {
 };
 
 export async function captureRegion(): Promise<CaptureResult> {
-  const filePath = path.join(os.tmpdir(), `rapidlens-capture-${Date.now()}-${Math.random().toString(16).slice(2)}.png`);
+  const filePath = path.join(os.tmpdir(), `text-shot-capture-${Date.now()}-${Math.random().toString(16).slice(2)}.png`);
 
   const { code, stderr } = await run('/usr/sbin/screencapture', ['-i', '-x', filePath]);
 
