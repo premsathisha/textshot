@@ -1,13 +1,14 @@
 {
   "name": "text-shot",
   "productName": "Text Shot",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Fast macOS background OCR utility",
   "main": "dist/main/main.js",
   "author": "",
   "license": "UNLICENSED",
   "scripts": {
     "clean": "rm -rf dist bin release",
+    "version:bump": "npm version minor --no-git-tag-version",
     "build": "npm run clean && npm run build:ts && npm run copy:renderer && npm run build:helper && npm run copy:helper && npm run build:settings-app && npm run copy:settings-app",
     "build:ts": "tsc -p tsconfig.json",
     "copy:renderer": "mkdir -p dist/renderer && cp src/renderer/settings.html src/renderer/settings.css dist/renderer/",
@@ -19,8 +20,8 @@
     "start": "electron .",
     "test": "vitest run",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "dist": "npm run build && electron-builder --mac",
-    "dist:publish": "npm run build && electron-builder --mac --publish always"
+    "dist": "npm run version:bump && npm run build && electron-builder --mac",
+    "dist:publish": "npm run version:bump && npm run build && electron-builder --mac --publish always"
   },
   "dependencies": {
     "electron-updater": "^6.6.2"

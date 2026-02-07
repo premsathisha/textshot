@@ -1,0 +1,33 @@
+{
+  "": {
+    "swift-dependencies": "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettingsTests.build/master.swiftdeps"
+  },
+  "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/Tests/TextShotSettingsTests/SettingsFileStoreTests.swift": {
+    "dependencies": "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettingsTests.build/SettingsFileStoreTests.d",
+    "object": "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettingsTests.build/SettingsFileStoreTests.swift.o",
+    "swiftmodule": "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettingsTests.build/SettingsFileStoreTests~partial.swiftmodule",
+    "swift-dependencies": "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettingsTests.build/SettingsFileStoreTests.swiftdeps",
+    "diagnostics": "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettingsTests.build/SettingsFileStoreTests.dia"
+  },
+  "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/Tests/TextShotSettingsTests/SettingsViewModelTests.swift": {
+    "dependencies": "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettingsTests.build/SettingsViewModelTests.d",
+    "object": "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettingsTests.build/SettingsViewModelTests.swift.o",
+    "swiftmodule": "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettingsTests.build/SettingsViewModelTests~partial.swiftmodule",
+    "swift-dependencies": "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettingsTests.build/SettingsViewModelTests.swiftdeps",
+    "diagnostics": "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettingsTests.build/SettingsViewModelTests.dia"
+  },
+  "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/Tests/TextShotSettingsTests/ShortcutAvailabilityTests.swift": {
+    "dependencies": "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettingsTests.build/ShortcutAvailabilityTests.d",
+    "object": "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettingsTests.build/ShortcutAvailabilityTests.swift.o",
+    "swiftmodule": "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettingsTests.build/ShortcutAvailabilityTests~partial.swiftmodule",
+    "swift-dependencies": "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettingsTests.build/ShortcutAvailabilityTests.swiftdeps",
+    "diagnostics": "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettingsTests.build/ShortcutAvailabilityTests.dia"
+  },
+  "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/Tests/TextShotSettingsTests/ShortcutCodecTests.swift": {
+    "dependencies": "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettingsTests.build/ShortcutCodecTests.d",
+    "object": "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettingsTests.build/ShortcutCodecTests.swift.o",
+    "swiftmodule": "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettingsTests.build/ShortcutCodecTests~partial.swiftmodule",
+    "swift-dependencies": "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettingsTests.build/ShortcutCodecTests.swiftdeps",
+    "diagnostics": "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettingsTests.build/ShortcutCodecTests.dia"
+  }
+}

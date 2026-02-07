@@ -1,0 +1,766 @@
+{
+  "builtTestProducts" : [
+    {
+      "binaryPath" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettingsPackageTests.xctest/Contents/MacOS/TextShotSettingsPackageTests",
+      "packagePath" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app",
+      "productName" : "TextShotSettingsPackageTests"
+    }
+  ],
+  "copyCommands" : {
+
+  },
+  "explicitTargetDependencyImportCheckingMode" : {
+    "none" : {
+
+    }
+  },
+  "generatedSourceTargetSet" : [
+
+  ],
+  "pluginDescriptions" : [
+
+  ],
+  "swiftCommands" : {
+    "C.TextShotSettings-arm64-apple-macosx26.0-debug.module" : {
+      "executable" : "/Library/Developer/CommandLineTools/usr/bin/swiftc",
+      "fileList" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettings.build/sources",
+      "importPath" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/Modules",
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/Sources/TextShotSettings/AppEntry.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/Sources/TextShotSettings/ContentView.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/Sources/TextShotSettings/SettingsModel.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/Sources/TextShotSettings/ShortcutAvailability.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/Sources/TextShotSettings/ShortcutCodec.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/Sources/TextShotSettings/ShortcutRecorder.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/swift-version--1AB21518FC5DEDBE.txt"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettings.build/sources"
+        }
+      ],
+      "isLibrary" : false,
+      "moduleName" : "TextShotSettings",
+      "moduleOutputPath" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/Modules/TextShotSettings.swiftmodule",
+      "objects" : [
+        "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettings.build/AppEntry.swift.o",
+        "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettings.build/ContentView.swift.o",
+        "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettings.build/SettingsModel.swift.o",
+        "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettings.build/ShortcutAvailability.swift.o",
+        "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettings.build/ShortcutCodec.swift.o",
+        "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettings.build/ShortcutRecorder.swift.o"
+      ],
+      "otherArguments" : [
+        "-target",
+        "arm64-apple-macosx13.0",
+        "-incremental",
+        "-enable-batch-mode",
+        "-serialize-diagnostics",
+        "-index-store-path",
+        "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/index/store",
+        "-Onone",
+        "-enable-testing",
+        "-j12",
+        "-DSWIFT_PACKAGE",
+        "-DDEBUG",
+        "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+        "-module-cache-path",
+        "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/ModuleCache",
+        "-parseable-output",
+        "-Xfrontend",
+        "-entry-point-function-name",
+        "-Xfrontend",
+        "TextShotSettings_main",
+        "-swift-version",
+        "5",
+        "-I",
+        "/Library/Developer/CommandLineTools/Library/Developer/Frameworks",
+        "-L",
+        "/Library/Developer/CommandLineTools/Library/Developer/Frameworks",
+        "-plugin-path",
+        "/Library/Developer/CommandLineTools/usr/lib/swift/host/plugins/testing",
+        "-sdk",
+        "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
+        "-g",
+        "-Xcc",
+        "-isysroot",
+        "-Xcc",
+        "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
+        "-Xcc",
+        "-fPIC",
+        "-Xcc",
+        "-g",
+        "-package-name",
+        "settings_app"
+      ],
+      "outputFileMapPath" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettings.build/output-file-map.json",
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettings.build/AppEntry.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettings.build/ContentView.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettings.build/SettingsModel.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettings.build/ShortcutAvailability.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettings.build/ShortcutCodec.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettings.build/ShortcutRecorder.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/Modules/TextShotSettings.swiftmodule"
+        }
+      ],
+      "prepareForIndexing" : false,
+      "sources" : [
+        "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/Sources/TextShotSettings/AppEntry.swift",
+        "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/Sources/TextShotSettings/ContentView.swift",
+        "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/Sources/TextShotSettings/SettingsModel.swift",
+        "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/Sources/TextShotSettings/ShortcutAvailability.swift",
+        "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/Sources/TextShotSettings/ShortcutCodec.swift",
+        "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/Sources/TextShotSettings/ShortcutRecorder.swift"
+      ],
+      "tempsPath" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettings.build",
+      "wholeModuleOptimization" : false
+    },
+    "C.TextShotSettingsPackageTests-arm64-apple-macosx26.0-debug.module" : {
+      "executable" : "/Library/Developer/CommandLineTools/usr/bin/swiftc",
+      "fileList" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettingsPackageTests.build/sources",
+      "importPath" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/Modules",
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettingsPackageTests.derived/runner.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/swift-version--1AB21518FC5DEDBE.txt"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/Modules/TextShotSettingsTests.swiftmodule"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettingsPackageTests.build/sources"
+        }
+      ],
+      "isLibrary" : true,
+      "moduleName" : "TextShotSettingsPackageTests",
+      "moduleOutputPath" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/Modules/TextShotSettingsPackageTests.swiftmodule",
+      "objects" : [
+        "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettingsPackageTests.build/runner.swift.o"
+      ],
+      "otherArguments" : [
+        "-target",
+        "arm64-apple-macosx13.0",
+        "-incremental",
+        "-enable-batch-mode",
+        "-serialize-diagnostics",
+        "-index-store-path",
+        "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/index/store",
+        "-Onone",
+        "-enable-testing",
+        "-Xfrontend",
+        "-enable-cross-import-overlays",
+        "-j12",
+        "-DSWIFT_PACKAGE",
+        "-DDEBUG",
+        "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+        "-module-cache-path",
+        "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/ModuleCache",
+        "-parseable-output",
+        "-parse-as-library",
+        "-emit-objc-header",
+        "-emit-objc-header-path",
+        "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettingsPackageTests.build/include/TextShotSettingsPackageTests-Swift.h",
+        "-I",
+        "/Library/Developer/CommandLineTools/Library/Developer/Frameworks",
+        "-L",
+        "/Library/Developer/CommandLineTools/Library/Developer/Frameworks",
+        "-plugin-path",
+        "/Library/Developer/CommandLineTools/usr/lib/swift/host/plugins/testing",
+        "-sdk",
+        "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
+        "-g",
+        "-Xcc",
+        "-isysroot",
+        "-Xcc",
+        "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
+        "-Xcc",
+        "-fPIC",
+        "-Xcc",
+        "-g",
+        "-package-name",
+        "settings_app"
+      ],
+      "outputFileMapPath" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettingsPackageTests.build/output-file-map.json",
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettingsPackageTests.build/runner.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/Modules/TextShotSettingsPackageTests.swiftmodule"
+        }
+      ],
+      "prepareForIndexing" : false,
+      "sources" : [
+        "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettingsPackageTests.derived/runner.swift"
+      ],
+      "tempsPath" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettingsPackageTests.build",
+      "wholeModuleOptimization" : false
+    },
+    "C.TextShotSettingsTests-arm64-apple-macosx26.0-debug.module" : {
+      "executable" : "/Library/Developer/CommandLineTools/usr/bin/swiftc",
+      "fileList" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettingsTests.build/sources",
+      "importPath" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/Modules",
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/Tests/TextShotSettingsTests/SettingsFileStoreTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/Tests/TextShotSettingsTests/SettingsViewModelTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/Tests/TextShotSettingsTests/ShortcutAvailabilityTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/Tests/TextShotSettingsTests/ShortcutCodecTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/swift-version--1AB21518FC5DEDBE.txt"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/text-shot-settings"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettingsTests.build/sources"
+        }
+      ],
+      "isLibrary" : true,
+      "moduleName" : "TextShotSettingsTests",
+      "moduleOutputPath" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/Modules/TextShotSettingsTests.swiftmodule",
+      "objects" : [
+        "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettingsTests.build/SettingsFileStoreTests.swift.o",
+        "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettingsTests.build/SettingsViewModelTests.swift.o",
+        "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettingsTests.build/ShortcutAvailabilityTests.swift.o",
+        "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettingsTests.build/ShortcutCodecTests.swift.o"
+      ],
+      "otherArguments" : [
+        "-target",
+        "arm64-apple-macosx13.0",
+        "-incremental",
+        "-enable-batch-mode",
+        "-serialize-diagnostics",
+        "-index-store-path",
+        "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/index/store",
+        "-Onone",
+        "-enable-testing",
+        "-Xfrontend",
+        "-enable-cross-import-overlays",
+        "-j12",
+        "-DSWIFT_PACKAGE",
+        "-DDEBUG",
+        "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+        "-module-cache-path",
+        "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/ModuleCache",
+        "-parseable-output",
+        "-parse-as-library",
+        "-swift-version",
+        "5",
+        "-I",
+        "/Library/Developer/CommandLineTools/Library/Developer/Frameworks",
+        "-L",
+        "/Library/Developer/CommandLineTools/Library/Developer/Frameworks",
+        "-plugin-path",
+        "/Library/Developer/CommandLineTools/usr/lib/swift/host/plugins/testing",
+        "-sdk",
+        "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
+        "-g",
+        "-Xcc",
+        "-isysroot",
+        "-Xcc",
+        "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
+        "-Xcc",
+        "-fPIC",
+        "-Xcc",
+        "-g",
+        "-package-name",
+        "settings_app"
+      ],
+      "outputFileMapPath" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettingsTests.build/output-file-map.json",
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettingsTests.build/SettingsFileStoreTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettingsTests.build/SettingsViewModelTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettingsTests.build/ShortcutAvailabilityTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettingsTests.build/ShortcutCodecTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/Modules/TextShotSettingsTests.swiftmodule"
+        }
+      ],
+      "prepareForIndexing" : false,
+      "sources" : [
+        "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/Tests/TextShotSettingsTests/SettingsFileStoreTests.swift",
+        "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/Tests/TextShotSettingsTests/SettingsViewModelTests.swift",
+        "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/Tests/TextShotSettingsTests/ShortcutAvailabilityTests.swift",
+        "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/Tests/TextShotSettingsTests/ShortcutCodecTests.swift"
+      ],
+      "tempsPath" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettingsTests.build",
+      "wholeModuleOptimization" : false
+    }
+  },
+  "swiftFrontendCommands" : {
+
+  },
+  "swiftTargetScanArgs" : {
+    "TextShotSettings" : [
+      "/Library/Developer/CommandLineTools/usr/bin/swiftc",
+      "-module-name",
+      "TextShotSettings",
+      "-package-name",
+      "settings_app",
+      "-c",
+      "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/Sources/TextShotSettings/AppEntry.swift",
+      "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/Sources/TextShotSettings/ContentView.swift",
+      "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/Sources/TextShotSettings/SettingsModel.swift",
+      "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/Sources/TextShotSettings/ShortcutAvailability.swift",
+      "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/Sources/TextShotSettings/ShortcutCodec.swift",
+      "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/Sources/TextShotSettings/ShortcutRecorder.swift",
+      "-I",
+      "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/Modules",
+      "-target",
+      "arm64-apple-macosx13.0",
+      "-incremental",
+      "-enable-batch-mode",
+      "-serialize-diagnostics",
+      "-index-store-path",
+      "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/index/store",
+      "-Onone",
+      "-enable-testing",
+      "-j12",
+      "-DSWIFT_PACKAGE",
+      "-DDEBUG",
+      "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+      "-module-cache-path",
+      "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/ModuleCache",
+      "-parseable-output",
+      "-Xfrontend",
+      "-entry-point-function-name",
+      "-Xfrontend",
+      "TextShotSettings_main",
+      "-swift-version",
+      "5",
+      "-I",
+      "/Library/Developer/CommandLineTools/Library/Developer/Frameworks",
+      "-L",
+      "/Library/Developer/CommandLineTools/Library/Developer/Frameworks",
+      "-plugin-path",
+      "/Library/Developer/CommandLineTools/usr/lib/swift/host/plugins/testing",
+      "-sdk",
+      "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
+      "-g",
+      "-Xcc",
+      "-isysroot",
+      "-Xcc",
+      "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
+      "-Xcc",
+      "-fPIC",
+      "-Xcc",
+      "-g",
+      "-package-name",
+      "settings_app",
+      "-driver-use-frontend-path",
+      "/Library/Developer/CommandLineTools/usr/bin/swiftc"
+    ],
+    "TextShotSettingsPackageTests" : [
+      "/Library/Developer/CommandLineTools/usr/bin/swiftc",
+      "-module-name",
+      "TextShotSettingsPackageTests",
+      "-package-name",
+      "settings_app",
+      "-c",
+      "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettingsPackageTests.derived/runner.swift",
+      "-I",
+      "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/Modules",
+      "-target",
+      "arm64-apple-macosx13.0",
+      "-incremental",
+      "-enable-batch-mode",
+      "-serialize-diagnostics",
+      "-index-store-path",
+      "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/index/store",
+      "-Onone",
+      "-enable-testing",
+      "-Xfrontend",
+      "-enable-cross-import-overlays",
+      "-j12",
+      "-DSWIFT_PACKAGE",
+      "-DDEBUG",
+      "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+      "-module-cache-path",
+      "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/ModuleCache",
+      "-parseable-output",
+      "-parse-as-library",
+      "-emit-objc-header",
+      "-emit-objc-header-path",
+      "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettingsPackageTests.build/include/TextShotSettingsPackageTests-Swift.h",
+      "-I",
+      "/Library/Developer/CommandLineTools/Library/Developer/Frameworks",
+      "-L",
+      "/Library/Developer/CommandLineTools/Library/Developer/Frameworks",
+      "-plugin-path",
+      "/Library/Developer/CommandLineTools/usr/lib/swift/host/plugins/testing",
+      "-sdk",
+      "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
+      "-g",
+      "-Xcc",
+      "-isysroot",
+      "-Xcc",
+      "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
+      "-Xcc",
+      "-fPIC",
+      "-Xcc",
+      "-g",
+      "-package-name",
+      "settings_app",
+      "-driver-use-frontend-path",
+      "/Library/Developer/CommandLineTools/usr/bin/swiftc"
+    ],
+    "TextShotSettingsTests" : [
+      "/Library/Developer/CommandLineTools/usr/bin/swiftc",
+      "-module-name",
+      "TextShotSettingsTests",
+      "-package-name",
+      "settings_app",
+      "-c",
+      "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/Tests/TextShotSettingsTests/SettingsFileStoreTests.swift",
+      "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/Tests/TextShotSettingsTests/SettingsViewModelTests.swift",
+      "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/Tests/TextShotSettingsTests/ShortcutAvailabilityTests.swift",
+      "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/Tests/TextShotSettingsTests/ShortcutCodecTests.swift",
+      "-I",
+      "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/Modules",
+      "-target",
+      "arm64-apple-macosx13.0",
+      "-incremental",
+      "-enable-batch-mode",
+      "-serialize-diagnostics",
+      "-index-store-path",
+      "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/index/store",
+      "-Onone",
+      "-enable-testing",
+      "-Xfrontend",
+      "-enable-cross-import-overlays",
+      "-j12",
+      "-DSWIFT_PACKAGE",
+      "-DDEBUG",
+      "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+      "-module-cache-path",
+      "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/ModuleCache",
+      "-parseable-output",
+      "-parse-as-library",
+      "-swift-version",
+      "5",
+      "-I",
+      "/Library/Developer/CommandLineTools/Library/Developer/Frameworks",
+      "-L",
+      "/Library/Developer/CommandLineTools/Library/Developer/Frameworks",
+      "-plugin-path",
+      "/Library/Developer/CommandLineTools/usr/lib/swift/host/plugins/testing",
+      "-sdk",
+      "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
+      "-g",
+      "-Xcc",
+      "-isysroot",
+      "-Xcc",
+      "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
+      "-Xcc",
+      "-fPIC",
+      "-Xcc",
+      "-g",
+      "-package-name",
+      "settings_app",
+      "-driver-use-frontend-path",
+      "/Library/Developer/CommandLineTools/usr/bin/swiftc"
+    ]
+  },
+  "targetDependencyMap" : {
+    "TextShotSettings" : [
+
+    ],
+    "TextShotSettingsPackageTests" : [
+      "TextShotSettingsTests",
+      "TextShotSettings"
+    ],
+    "TextShotSettingsTests" : [
+      "TextShotSettings"
+    ]
+  },
+  "testDiscoveryCommands" : {
+
+  },
+  "testEntryPointCommands" : {
+    "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettingsPackageTests.derived/runner.swift" : {
+      "inputs" : [
+
+      ],
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettingsPackageTests.derived/runner.swift"
+        }
+      ]
+    }
+  },
+  "traitConfiguration" : {
+    "default" : {
+
+    }
+  },
+  "writeCommands" : {
+    "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettings.build/sources" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<sources-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/Sources/TextShotSettings/AppEntry.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/Sources/TextShotSettings/ContentView.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/Sources/TextShotSettings/SettingsModel.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/Sources/TextShotSettings/ShortcutAvailability.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/Sources/TextShotSettings/ShortcutCodec.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/Sources/TextShotSettings/ShortcutRecorder.swift"
+        }
+      ],
+      "outputFilePath" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettings.build/sources"
+    },
+    "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettingsPackageTests.build/sources" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<sources-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettingsPackageTests.derived/runner.swift"
+        }
+      ],
+      "outputFilePath" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettingsPackageTests.build/sources"
+    },
+    "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettingsPackageTests.product/Objects.LinkFileList" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<link-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettings.build/AppEntry.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettings.build/ContentView.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettings.build/SettingsModel.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettings.build/ShortcutAvailability.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettings.build/ShortcutCodec.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettings.build/ShortcutRecorder.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettingsPackageTests.build/runner.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettingsTests.build/SettingsFileStoreTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettingsTests.build/SettingsViewModelTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettingsTests.build/ShortcutAvailabilityTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettingsTests.build/ShortcutCodecTests.swift.o"
+        }
+      ],
+      "outputFilePath" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettingsPackageTests.product/Objects.LinkFileList"
+    },
+    "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettingsTests.build/sources" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<sources-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/Tests/TextShotSettingsTests/SettingsFileStoreTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/Tests/TextShotSettingsTests/SettingsViewModelTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/Tests/TextShotSettingsTests/ShortcutAvailabilityTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/Tests/TextShotSettingsTests/ShortcutCodecTests.swift"
+        }
+      ],
+      "outputFilePath" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettingsTests.build/sources"
+    },
+    "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/swift-version--1AB21518FC5DEDBE.txt" : {
+      "alwaysOutOfDate" : true,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<swift-get-version>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Library/Developer/CommandLineTools/usr/bin/swiftc"
+        }
+      ],
+      "outputFilePath" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/swift-version--1AB21518FC5DEDBE.txt"
+    },
+    "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/text-shot-settings-entitlement.plist" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<entitlement-plist>"
+        },
+        {
+          "kind" : "virtual",
+          "name" : "<com.apple.security.get-task-allow>"
+        }
+      ],
+      "outputFilePath" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/text-shot-settings-entitlement.plist"
+    },
+    "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/text-shot-settings.product/Objects.LinkFileList" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<link-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettings.build/AppEntry.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettings.build/ContentView.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettings.build/SettingsModel.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettings.build/ShortcutAvailability.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettings.build/ShortcutCodec.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/TextShotSettings.build/ShortcutRecorder.swift.o"
+        }
+      ],
+      "outputFilePath" : "/Users/premsathishaetagi/Documents/Text Shot/native/settings-app/.build/test-scratch/arm64-apple-macosx/debug/text-shot-settings.product/Objects.LinkFileList"
+    }
+  }
+}

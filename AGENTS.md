@@ -25,3 +25,12 @@ This project is a menu bar macOS utility for fast region OCR. It is an Electron 
 - `npm run clean`: Remove generated files (`dist`, `bin`, `release`).
 - `bash scripts/build-helper.sh`: Manually build the universal Swift OCR helper.
 - `npm run typecheck`: Typecheck the project.
+
+## Release Requirements (Mandatory Every Edit Cycle)
+
+- Bump app version by `+0.1` after making code edits:
+  - `npm version minor --no-git-tag-version`
+- Rebuild and regenerate distribution artifacts (including DMG):
+  - `npm run build && npx electron-builder --mac`
+- Copy the latest DMG artifacts into `release/`:
+  - `mkdir -p release && cp -f dist/*.dmg dist/*.dmg.blockmap release/`

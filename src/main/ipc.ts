@@ -1,6 +1,5 @@
 import { BrowserWindow, IpcMain, app } from 'electron';
 import { SettingsStore } from './settings-store';
-import { registerHotkey } from './hotkey';
 
 type IpcDeps = {
   ipcMain: IpcMain;
@@ -13,11 +12,12 @@ export function registerIpc({ ipcMain, store, onHotkeyChange, getSettingsWindow 
   ipcMain.handle('settings:get', () => store.get());
 
   ipcMain.handle('settings:update', (_event, partial) => {
-    const next = store.update(partial || {});
+    store.update(partial || {});
     if (app.isPackaged) {
-      app.setLoginItemSettings({ openAtLogin: next.launchAtLogin });
+      app.setLoginItemSettings({ openAtLogin: store.get().launchAtLogin });
     }
     onHotkeyChange();
+    const next = store.reloadFromDisk();
 
     const win = getSettingsWindow();
     if (win && !win.isDestroyed()) {

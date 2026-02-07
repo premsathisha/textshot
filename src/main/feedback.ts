@@ -2,7 +2,8 @@ import { BrowserWindow, Rectangle, screen } from 'electron';
 
 const TOAST_WIDTH = 240;
 const TOAST_HEIGHT = 90;
-const DEFAULT_DURATION_MS = 1000;
+const DEFAULT_DURATION_MS = 1020;
+const TOAST_ANIMATION_MS = 180;
 
 type TimeoutHandle = ReturnType<typeof setTimeout>;
 
@@ -47,16 +48,31 @@ export function createToastPresenter(overrides: Partial<ToastPresenterDeps> = {}
 
   let toastWindow: BrowserWindow | null = null;
   let hideTimer: TimeoutHandle | null = null;
+  let fadeTimer: TimeoutHandle | null = null;
 
-  const clearHideTimer = (): void => {
-    if (!hideTimer) return;
-    deps.clearTimer(hideTimer);
-    hideTimer = null;
+  const clearHideTimers = (): void => {
+    if (hideTimer) {
+      deps.clearTimer(hideTimer);
+      hideTimer = null;
+    }
+
+    if (fadeTimer) {
+      deps.clearTimer(fadeTimer);
+      fadeTimer = null;
+    }
   };
 
   const hideToast = (): void => {
     if (!toastWindow || toastWindow.isDestroyed()) return;
-    toastWindow.hide();
+    void toastWindow.webContents.executeJavaScript('window.__textShotHide?.();', true).catch(() => {
+      /* no-op: animation fallback to immediate hide */
+    });
+
+    fadeTimer = deps.setTimer(() => {
+      fadeTimer = null;
+      if (!toastWindow || toastWindow.isDestroyed()) return;
+      toastWindow.hide();
+    }, TOAST_ANIMATION_MS);
   };
 
   const ensureWindow = (): BrowserWindow => {
@@ -70,7 +86,7 @@ export function createToastPresenter(overrides: Partial<ToastPresenterDeps> = {}
 
   return {
     show: async (message: string): Promise<void> => {
-      clearHideTimer();
+      clearHideTimers();
 
       const display = deps.getDisplayBounds();
       const x = display.x + Math.round((display.width - TOAST_WIDTH) / 2);
@@ -82,15 +98,18 @@ export function createToastPresenter(overrides: Partial<ToastPresenterDeps> = {}
 
       if (!win.isDestroyed()) {
         win.showInactive();
+        void win.webContents.executeJavaScript('window.__textShotShow?.();', true).catch(() => {
+          /* no-op: toast is still visible without the helper */
+        });
       }
 
       hideTimer = deps.setTimer(() => {
-        hideToast();
         hideTimer = null;
+        hideToast();
       }, deps.durationMs);
     },
     dispose: (): void => {
-      clearHideTimer();
+      clearHideTimers();
       if (!toastWindow || toastWindow.isDestroyed()) {
         toastWindow = null;
         return;
@@ -115,7 +134,10 @@ function createToastWindow(): BrowserWindow {
     movable: false,
     focusable: false,
     skipTaskbar: true,
-    hasShadow: false,
+    hasShadow: true,
+    vibrancy: 'hud',
+    visualEffectState: 'active',
+    backgroundColor: '#00000000',
     webPreferences: {
       backgroundThrottling: false,
       contextIsolation: true,
@@ -147,26 +169,66 @@ function buildToastUrl(message: string): string {
         height: 100%;
         margin: 0;
         background: transparent;
+        overflow: hidden;
       }
       body {
         display: flex;
         align-items: center;
         justify-content: center;
+        padding: 8px;
+        box-sizing: border-box;
+        color-scheme: light dark;
+      }
+      body.ready .toast {
+        opacity: 1;
+        transform: scale(1);
+      }
+      body.hiding .toast {
+        opacity: 0;
+        transform: scale(0.985);
       }
       .toast {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         border-radius: 12px;
-        padding: 14px 24px;
-        color: #ffffff;
+        padding: 14px;
+        box-sizing: border-box;
+        color: #181b22;
         font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
-        font-size: 18px;
+        font-size: 17px;
         font-weight: 600;
         letter-spacing: 0.01em;
-        background: rgba(24, 24, 24, 0.52);
-        border: 1px solid rgba(255, 255, 255, 0.24);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
+        border: none;
+        background: transparent;
+        box-shadow: 0 8px 22px rgba(16, 20, 28, 0.16);
+        opacity: 0;
+        transform: scale(0.96);
+        transition: opacity ${TOAST_ANIMATION_MS}ms ease, transform ${TOAST_ANIMATION_MS}ms ease;
+      }
+      @media (prefers-color-scheme: dark) {
+        .toast {
+          color: #f3f5f7;
+        }
       }
     </style>
+    <script>
+      window.__textShotShow = () => {
+        document.body.classList.remove('hiding');
+        requestAnimationFrame(() => {
+          document.body.classList.add('ready');
+        });
+      };
+      window.__textShotHide = () => {
+        document.body.classList.remove('ready');
+        document.body.classList.add('hiding');
+      };
+      window.addEventListener('DOMContentLoaded', () => {
+        window.__textShotShow();
+      });
+    </script>
   </head>
   <body>
     <div class="toast">${safeMessage}</div>

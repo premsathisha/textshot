@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { ChildProcess, spawn } from 'node:child_process';
 import { createTray } from './tray';
-import { registerHotkey, unregisterHotkeys } from './hotkey';
+import { activateHotkey, getActiveHotkey, unregisterHotkeys } from './hotkey';
 import { captureRegion } from './capture';
 import { runOcrWithRetry } from './ocr';
 import { SettingsStore } from './settings-store';
@@ -17,11 +17,29 @@ let settingsWindow: BrowserWindow | null = null;
 let tray = null as ReturnType<typeof createTray> | null;
 let lastCopiedText = '';
 let nativeSettingsProcess: ChildProcess | null = null;
+let settingsFileWatcher: fs.FSWatcher | null = null;
+let settingsWatchDebounceTimer: ReturnType<typeof setTimeout> | null = null;
+
+const DEFAULT_HOTKEY = 'CommandOrControl+Shift+2';
+const SETTINGS_FILE_WATCH_DEBOUNCE_MS = 120;
+
 const store = new SettingsStore();
+
+function bringSettingsWindowToFront(window: BrowserWindow): void {
+  if (window.isDestroyed()) return;
+  if (window.isMinimized()) {
+    window.restore();
+  }
+
+  app.focus({ steal: true });
+  window.show();
+  window.focus();
+  window.moveTop();
+}
 
 function createSettingsWindow(): void {
   if (settingsWindow && !settingsWindow.isDestroyed()) {
-    settingsWindow.focus();
+    bringSettingsWindowToFront(settingsWindow);
     return;
   }
 
@@ -31,6 +49,7 @@ function createSettingsWindow(): void {
     resizable: false,
     maximizable: false,
     minimizable: false,
+    show: false,
     title: 'Text Shot Settings',
     webPreferences: {
       preload: path.join(__dirname, '../preload/settings-preload.js'),
@@ -40,28 +59,156 @@ function createSettingsWindow(): void {
   });
 
   const settingsHtml = path.join(app.getAppPath(), 'dist', 'renderer', 'settings.html');
-  settingsWindow.loadFile(settingsHtml);
+  settingsWindow.loadFile(settingsHtml).catch(() => {
+    /* no-op: fallback window remains closed if renderer fails to load */
+  });
+  settingsWindow.once('ready-to-show', () => {
+    if (!settingsWindow || settingsWindow.isDestroyed()) return;
+    bringSettingsWindowToFront(settingsWindow);
+  });
   settingsWindow.on('closed', () => {
     settingsWindow = null;
   });
 }
 
-function applyPersistedSettings(): void {
-  store.reloadFromDisk();
-  applyHotkey();
-
-  if (app.isPackaged) {
-    app.setLoginItemSettings({ openAtLogin: store.get().launchAtLogin });
-  }
-
+function notifySettingsWindowChanged(): void {
   const win = settingsWindow;
   if (win && !win.isDestroyed()) {
     win.webContents.send('settings:changed', store.get());
   }
 }
 
+type HotkeyApplyResult = {
+  applied: boolean;
+  requestedHotkey: string;
+  activeHotkey: string | null;
+  usedFallback: boolean;
+};
+
+function applyHotkey(): HotkeyApplyResult {
+  const requestedHotkey = store.get().hotkey.trim();
+
+  const requestedApplied = activateHotkey(requestedHotkey, () => {
+    void runCaptureFlow();
+  });
+  if (requestedApplied) {
+    return {
+      applied: true,
+      requestedHotkey,
+      activeHotkey: getActiveHotkey(),
+      usedFallback: false
+    };
+  }
+
+  const existingActiveHotkey = getActiveHotkey();
+  if (existingActiveHotkey) {
+    return {
+      applied: false,
+      requestedHotkey,
+      activeHotkey: existingActiveHotkey,
+      usedFallback: false
+    };
+  }
+
+  const fallbackApplied = activateHotkey(DEFAULT_HOTKEY, () => {
+    void runCaptureFlow();
+  });
+  return {
+    applied: fallbackApplied,
+    requestedHotkey,
+    activeHotkey: getActiveHotkey(),
+    usedFallback: fallbackApplied
+  };
+}
+
+function applyPersistedSettings(options: { repairHotkeyOnFailure?: boolean } = {}): void {
+  const { repairHotkeyOnFailure = false } = options;
+  store.reloadFromDisk();
+  const hotkeyResult = applyHotkey();
+
+  if (
+    repairHotkeyOnFailure &&
+    hotkeyResult.activeHotkey &&
+    hotkeyResult.requestedHotkey !== hotkeyResult.activeHotkey &&
+    (!hotkeyResult.applied || hotkeyResult.usedFallback)
+  ) {
+    store.update({ hotkey: hotkeyResult.activeHotkey });
+  }
+
+  if (app.isPackaged) {
+    app.setLoginItemSettings({ openAtLogin: store.get().launchAtLogin });
+  }
+
+  notifySettingsWindowChanged();
+}
+
+function stopSettingsFileWatcher(): void {
+  if (settingsWatchDebounceTimer) {
+    clearTimeout(settingsWatchDebounceTimer);
+    settingsWatchDebounceTimer = null;
+  }
+
+  if (!settingsFileWatcher) return;
+  settingsFileWatcher.close();
+  settingsFileWatcher = null;
+}
+
+function scheduleSettingsReloadFromDisk(): void {
+  if (settingsWatchDebounceTimer) {
+    clearTimeout(settingsWatchDebounceTimer);
+  }
+
+  settingsWatchDebounceTimer = setTimeout(() => {
+    settingsWatchDebounceTimer = null;
+    applyPersistedSettings({ repairHotkeyOnFailure: true });
+  }, SETTINGS_FILE_WATCH_DEBOUNCE_MS);
+}
+
+function startSettingsFileWatcher(): void {
+  if (settingsFileWatcher) return;
+
+  const settingsFilePath = store.getFilePath();
+  const settingsDirectory = path.dirname(settingsFilePath);
+  const settingsFileName = path.basename(settingsFilePath);
+
+  try {
+    settingsFileWatcher = fs.watch(settingsDirectory, (_eventType, filename) => {
+      if (filename && filename.toString() !== settingsFileName) {
+        return;
+      }
+
+      scheduleSettingsReloadFromDisk();
+    });
+    settingsFileWatcher.on('error', () => {
+      stopSettingsFileWatcher();
+    });
+  } catch {
+    settingsFileWatcher = null;
+  }
+}
+
+function clearNativeSettingsProcessReference(): void {
+  stopSettingsFileWatcher();
+  nativeSettingsProcess = null;
+}
+
+function requestNativeSettingsFocus(): boolean {
+  if (!nativeSettingsProcess || nativeSettingsProcess.exitCode !== null) {
+    return false;
+  }
+
+  try {
+    nativeSettingsProcess.kill('SIGUSR1');
+    startSettingsFileWatcher();
+    return true;
+  } catch {
+    clearNativeSettingsProcessReference();
+    return false;
+  }
+}
+
 function openNativeSettings(): boolean {
-  if (nativeSettingsProcess && nativeSettingsProcess.exitCode === null) {
+  if (requestNativeSettingsFocus()) {
     return true;
   }
 
@@ -77,18 +224,20 @@ function openNativeSettings(): boolean {
       stdio: 'ignore'
     });
   } catch {
-    nativeSettingsProcess = null;
+    clearNativeSettingsProcessReference();
     return false;
   }
 
+  startSettingsFileWatcher();
+
   nativeSettingsProcess.once('error', () => {
-    nativeSettingsProcess = null;
+    clearNativeSettingsProcessReference();
     createSettingsWindow();
   });
 
   nativeSettingsProcess.once('close', () => {
-    nativeSettingsProcess = null;
-    applyPersistedSettings();
+    clearNativeSettingsProcessReference();
+    applyPersistedSettings({ repairHotkeyOnFailure: true });
   });
 
   return true;
@@ -157,18 +306,6 @@ async function runCaptureFlow(): Promise<void> {
   }
 }
 
-function applyHotkey(): void {
-  const ok = registerHotkey(store.get().hotkey, () => {
-    void runCaptureFlow();
-  });
-
-  if (!ok) {
-    registerHotkey('CommandOrControl+Shift+2', () => {
-      void runCaptureFlow();
-    });
-  }
-}
-
 function bootstrap(): void {
   if (process.platform === 'darwin' && app.dock) {
     app.dock.hide();
@@ -192,15 +329,12 @@ function bootstrap(): void {
     () => app.quit()
   );
 
-  applyHotkey();
-  if (app.isPackaged) {
-    app.setLoginItemSettings({ openAtLogin: store.get().launchAtLogin });
-  }
+  applyPersistedSettings({ repairHotkeyOnFailure: true });
 
   registerIpc({
     ipcMain,
     store,
-    onHotkeyChange: applyHotkey,
+    onHotkeyChange: () => applyPersistedSettings({ repairHotkeyOnFailure: true }),
     getSettingsWindow: () => settingsWindow
   });
 
@@ -212,6 +346,7 @@ function bootstrap(): void {
 app.whenReady().then(bootstrap);
 
 app.on('will-quit', () => {
+  stopSettingsFileWatcher();
   disposeFeedbackToast();
   unregisterHotkeys();
 });

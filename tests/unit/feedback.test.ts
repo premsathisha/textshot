@@ -40,6 +40,9 @@ class MockBrowserWindow {
   public readonly setAlwaysOnTop = vi.fn();
   public readonly setVisibleOnAllWorkspaces = vi.fn();
   public readonly setIgnoreMouseEvents = vi.fn();
+  public readonly webContents = {
+    executeJavaScript: vi.fn(async () => {})
+  };
 
   private destroyed = false;
 
@@ -96,14 +99,25 @@ describe('createToastPresenter', () => {
     await presenter.show('Copied!');
 
     const firstWindow = mockState.browserWindowInstances[0];
-    vi.advanceTimersByTime(900);
+    vi.advanceTimersByTime(1019);
     expect(firstWindow.hide).not.toHaveBeenCalled();
 
     await presenter.show('Error');
-    vi.advanceTimersByTime(900);
+    vi.advanceTimersByTime(1019);
     expect(firstWindow.hide).not.toHaveBeenCalled();
 
-    vi.advanceTimersByTime(100);
+    vi.advanceTimersByTime(181);
     expect(firstWindow.hide).toHaveBeenCalledTimes(1);
+  });
+
+  it('creates the toast window with native HUD material and active visual effect state', async () => {
+    const presenter = createToastPresenter();
+    await presenter.show('Copied!');
+
+    const firstWindow = mockState.browserWindowInstances[0];
+    expect(firstWindow.options.vibrancy).toBe('hud');
+    expect(firstWindow.options.visualEffectState).toBe('active');
+    expect(firstWindow.options.focusable).toBe(false);
+    expect(firstWindow.options.hasShadow).toBe(true);
   });
 });

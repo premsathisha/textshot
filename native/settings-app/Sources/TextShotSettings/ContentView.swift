@@ -8,10 +8,15 @@ final class SettingsViewModel: ObservableObject {
     @Published var errorMessage = ""
 
     private let store: SettingsFileStore
+    private let shortcutAvailabilityChecker: any ShortcutAvailabilityChecking
     private var persistedSettings: PersistedSettings
 
-    init(settingsURL: URL) {
+    init(
+        settingsURL: URL,
+        shortcutAvailabilityChecker: any ShortcutAvailabilityChecking = ShortcutAvailabilityChecker()
+    ) {
         self.store = SettingsFileStore(fileURL: settingsURL)
+        self.shortcutAvailabilityChecker = shortcutAvailabilityChecker
 
         if let loaded = try? store.load() {
             self.persistedSettings = loaded
@@ -22,32 +27,57 @@ final class SettingsViewModel: ObservableObject {
         self.settings = persistedSettings.editable
     }
 
-    func onCapturedShortcut(_ accelerator: String) {
-        settings.hotkey = accelerator
+    func beginShortcutRecording() {
         errorMessage = ""
         statusMessage = ""
+        isRecording = true
+    }
+
+    func endShortcutRecording() {
+        isRecording = false
+    }
+
+    func onCapturedShortcut(_ accelerator: String) {
+        let previousHotkey = settings.hotkey
+
+        switch shortcutAvailabilityChecker.availability(for: accelerator) {
+        case .available:
+            settings.hotkey = accelerator
+            if !save(statusMessageOnSuccess: "Shortcut updated") {
+                settings.hotkey = previousHotkey
+            }
+        case .unavailable(let message):
+            settings.hotkey = previousHotkey
+            errorMessage = message
+            statusMessage = ""
+        }
+
         isRecording = false
     }
 
     func onInvalidShortcutInput() {
         errorMessage = "Unsupported shortcut. Use modifiers plus a letter, number, function, or navigation key."
         statusMessage = ""
+        isRecording = false
     }
 
-    func save() {
+    @discardableResult
+    func save(statusMessageOnSuccess: String = "Saved") -> Bool {
         if let validation = ShortcutCodec.validateAccelerator(settings.hotkey) {
             errorMessage = validation
             statusMessage = ""
-            return
+            return false
         }
 
         do {
             persistedSettings = try store.save(editable: settings, preserving: persistedSettings)
-            statusMessage = "Saved"
+            statusMessage = statusMessageOnSuccess
             errorMessage = ""
+            return true
         } catch {
             errorMessage = "Failed to save settings: \(error.localizedDescription)"
             statusMessage = ""
+            return false
         }
     }
 
@@ -84,7 +114,11 @@ struct ContentView: View {
                         )
 
                     Button(model.isRecording ? "Recording..." : "Record") {
-                        model.isRecording.toggle()
+                        if model.isRecording {
+                            model.endShortcutRecording()
+                        } else {
+                            model.beginShortcutRecording()
+                        }
                     }
                     .buttonStyle(.borderedProminent)
                 }
