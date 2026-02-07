@@ -1,7 +1,12 @@
-node_modules/
-dist/
-release/
-bin/
+/node_modules/
+/dist/
+/release/
+/bin/
+/resources/bin/
+/.swiftpm-module-cache/
+/.clang-module-cache/
+/native/ocr-helper/.build/
+/native/settings-app/.build/
+/(A Document Being Saved By swift-build*)
 .DS_Store
 *.log
-    

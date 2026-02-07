@@ -1,13 +1,13 @@
 {
   "name": "text-shot",
   "productName": "Text Shot",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Fast macOS background OCR utility",
   "main": "dist/main/main.js",
   "author": "",
   "license": "UNLICENSED",
   "scripts": {
-    "clean": "rm -rf dist bin release",
+    "clean": "bash scripts/clean-generated.sh",
     "version:bump": "npm version minor --no-git-tag-version",
     "build": "npm run clean && npm run build:ts && npm run copy:renderer && npm run build:helper && npm run copy:helper && npm run build:settings-app && npm run copy:settings-app",
     "build:ts": "tsc -p tsconfig.json",
