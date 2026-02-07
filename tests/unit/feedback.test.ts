@@ -37,6 +37,7 @@ class MockBrowserWindow {
   public readonly setBounds = vi.fn();
   public readonly showInactive = vi.fn();
   public readonly hide = vi.fn();
+  public readonly setVibrancy = vi.fn();
   public readonly setAlwaysOnTop = vi.fn();
   public readonly setVisibleOnAllWorkspaces = vi.fn();
   public readonly setIgnoreMouseEvents = vi.fn();
@@ -76,9 +77,10 @@ describe('createToastPresenter', () => {
 
     expect(mockState.browserWindowCtor).toHaveBeenCalledTimes(1);
     const firstWindow = mockState.browserWindowInstances[0];
-    expect(firstWindow.loadURL).toHaveBeenCalledTimes(2);
-    expect(firstWindow.loadURL.mock.calls[0]?.[0]).toContain('Copied!');
-    expect(firstWindow.loadURL.mock.calls[1]?.[0]).toContain('Error');
+    expect(firstWindow.loadURL).toHaveBeenCalledTimes(1);
+    const jsCalls = firstWindow.webContents.executeJavaScript.mock.calls.map((call) => call[0] as string);
+    expect(jsCalls.some((js) => js.includes("__textShotSetMessage?.('Copied!')"))).toBe(true);
+    expect(jsCalls.some((js) => js.includes("__textShotSetMessage?.('Error')"))).toBe(true);
   });
 
   it('centers toast in active display bounds', async () => {
@@ -119,5 +121,21 @@ describe('createToastPresenter', () => {
     expect(firstWindow.options.visualEffectState).toBe('active');
     expect(firstWindow.options.focusable).toBe(false);
     expect(firstWindow.options.hasShadow).toBe(true);
+    expect(firstWindow.setVibrancy).toHaveBeenCalledWith('hud');
+  });
+
+  it('ignores stale hide timers when a newer toast is displayed', async () => {
+    const presenter = createToastPresenter();
+    await presenter.show('Copied!');
+    const firstWindow = mockState.browserWindowInstances[0];
+
+    vi.advanceTimersByTime(800);
+    await presenter.show('No text');
+    vi.advanceTimersByTime(220);
+
+    expect(firstWindow.hide).not.toHaveBeenCalled();
+
+    vi.advanceTimersByTime(1020 + 181);
+    expect(firstWindow.hide).toHaveBeenCalledTimes(1);
   });
 });

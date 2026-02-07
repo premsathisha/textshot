@@ -47,8 +47,10 @@ export function createToastPresenter(overrides: Partial<ToastPresenterDeps> = {}
   };
 
   let toastWindow: BrowserWindow | null = null;
+  let shellLoaded = false;
   let hideTimer: TimeoutHandle | null = null;
   let fadeTimer: TimeoutHandle | null = null;
+  let displayToken = 0;
 
   const clearHideTimers = (): void => {
     if (hideTimer) {
@@ -62,17 +64,28 @@ export function createToastPresenter(overrides: Partial<ToastPresenterDeps> = {}
     }
   };
 
-  const hideToast = (): void => {
+  const hideToast = (token: number): void => {
+    if (token !== displayToken) return;
     if (!toastWindow || toastWindow.isDestroyed()) return;
     void toastWindow.webContents.executeJavaScript('window.__textShotHide?.();', true).catch(() => {
-      /* no-op: animation fallback to immediate hide */
+      recreateToastWindow();
     });
 
     fadeTimer = deps.setTimer(() => {
+      if (token !== displayToken) return;
       fadeTimer = null;
       if (!toastWindow || toastWindow.isDestroyed()) return;
       toastWindow.hide();
     }, TOAST_ANIMATION_MS);
+  };
+
+  const recreateToastWindow = (): void => {
+    if (toastWindow && !toastWindow.isDestroyed()) {
+      toastWindow.destroy();
+    }
+    toastWindow = null;
+    shellLoaded = false;
+    clearHideTimers();
   };
 
   const ensureWindow = (): BrowserWindow => {
@@ -81,31 +94,56 @@ export function createToastPresenter(overrides: Partial<ToastPresenterDeps> = {}
     }
 
     toastWindow = deps.createWindow();
+    shellLoaded = false;
     return toastWindow;
+  };
+
+  const ensureShellLoaded = async (window: BrowserWindow): Promise<void> => {
+    if (shellLoaded) return;
+    await window.loadURL(buildToastShellUrl());
+    shellLoaded = true;
+  };
+
+  const updateMessage = async (window: BrowserWindow, message: string): Promise<void> => {
+    const safeMessage = escapeForJavaScriptString(message);
+    await window.webContents.executeJavaScript(`window.__textShotSetMessage?.('${safeMessage}');`, true);
   };
 
   return {
     show: async (message: string): Promise<void> => {
       clearHideTimers();
+      displayToken += 1;
+      const token = displayToken;
 
       const display = deps.getDisplayBounds();
       const x = display.x + Math.round((display.width - TOAST_WIDTH) / 2);
       const y = display.y + Math.round((display.height - TOAST_HEIGHT) / 2);
 
-      const win = ensureWindow();
+      let win = ensureWindow();
       win.setBounds({ x, y, width: TOAST_WIDTH, height: TOAST_HEIGHT });
-      await win.loadURL(buildToastUrl(message));
+      try {
+        await ensureShellLoaded(win);
+        await updateMessage(win, message);
+      } catch {
+        recreateToastWindow();
+        win = ensureWindow();
+        win.setBounds({ x, y, width: TOAST_WIDTH, height: TOAST_HEIGHT });
+        await ensureShellLoaded(win);
+        await updateMessage(win, message);
+      }
 
       if (!win.isDestroyed()) {
+        win.setVibrancy('hud');
         win.showInactive();
         void win.webContents.executeJavaScript('window.__textShotShow?.();', true).catch(() => {
-          /* no-op: toast is still visible without the helper */
+          recreateToastWindow();
         });
       }
 
       hideTimer = deps.setTimer(() => {
+        if (token !== displayToken) return;
         hideTimer = null;
-        hideToast();
+        hideToast(token);
       }, deps.durationMs);
     },
     dispose: (): void => {
@@ -157,8 +195,7 @@ function getActiveDisplayBounds(): Rectangle {
   return screen.getDisplayNearestPoint(point).bounds;
 }
 
-function buildToastUrl(message: string): string {
-  const safeMessage = escapeHtml(message);
+function buildToastShellUrl(): string {
   const html = `<!doctype html>
 <html>
   <head>
@@ -215,6 +252,11 @@ function buildToastUrl(message: string): string {
       }
     </style>
     <script>
+      window.__textShotSetMessage = (message) => {
+        const node = document.getElementById('toast-message');
+        if (!node) return;
+        node.textContent = message;
+      };
       window.__textShotShow = () => {
         document.body.classList.remove('hiding');
         requestAnimationFrame(() => {
@@ -231,18 +273,19 @@ function buildToastUrl(message: string): string {
     </script>
   </head>
   <body>
-    <div class="toast">${safeMessage}</div>
+    <div id="toast-message" class="toast"></div>
   </body>
 </html>`;
 
   return `data:text/html;charset=utf-8,${encodeURIComponent(html)}`;
 }
 
-function escapeHtml(value: string): string {
+function escapeForJavaScriptString(value: string): string {
   return value
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#39;');
+    .replaceAll('\\', '\\\\')
+    .replaceAll("'", "\\'")
+    .replaceAll('\n', '\\n')
+    .replaceAll('\r', '\\r')
+    .replaceAll('\u2028', '\\u2028')
+    .replaceAll('\u2029', '\\u2029');
 }
