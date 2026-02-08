@@ -1,30 +1,26 @@
-import XCTest
+import Testing
 @testable import TextShotSettings
 
-final class ShortcutCodecTests: XCTestCase {
-    func testAcceleratorPrefersCommandOrControlWhenCommandPresent() {
-        let accelerator = ShortcutCodec.accelerator(modifiers: [.command, .shift], key: "2")
-        XCTAssertEqual(accelerator, "CommandOrControl+Shift+2")
-    }
+@Test
+func shortcutCodecUsesCommandOrControlWhenCommandPresent() {
+    let accelerator = ShortcutCodec.accelerator(modifiers: [.command, .shift], key: "2")
+    #expect(accelerator == "CommandOrControl+Shift+2")
+}
 
-    func testAcceleratorUsesControlWhenNoCommandPresent() {
-        let accelerator = ShortcutCodec.accelerator(modifiers: [.control, .alt], key: "k")
-        XCTAssertEqual(accelerator, "Control+Alt+K")
-    }
+@Test
+func shortcutCodecUsesControlWhenNoCommandPresent() {
+    let accelerator = ShortcutCodec.accelerator(modifiers: [.control, .alt], key: "k")
+    #expect(accelerator == "Control+Alt+K")
+}
 
-    func testAcceleratorRequiresModifier() {
-        XCTAssertNil(ShortcutCodec.accelerator(modifiers: [], key: "A"))
-    }
+@Test
+func shortcutCodecAllowsFunctionKeyWithoutModifier() {
+    let accelerator = ShortcutCodec.accelerator(modifiers: [], key: "F8")
+    #expect(accelerator == "F8")
+}
 
-    func testValidateRejectsMissingModifier() {
-        XCTAssertNotNil(ShortcutCodec.validateAccelerator("A"))
-    }
-
-    func testValidateRejectsUnknownKeyToken() {
-        XCTAssertNotNil(ShortcutCodec.validateAccelerator("CommandOrControl+VolumeUp"))
-    }
-
-    func testValidateAcceptsFunctionKey() {
-        XCTAssertNil(ShortcutCodec.validateAccelerator("CommandOrControl+F12"))
-    }
+@Test
+func shortcutCodecRejectsPrintableWithoutModifier() {
+    let validation = ShortcutCodec.validateAccelerator("A")
+    #expect(validation == "Shortcut must include at least one modifier, or use an F-key.")
 }

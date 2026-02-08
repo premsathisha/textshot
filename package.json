@@ -1,80 +1,21 @@
 {
   "name": "text-shot",
   "productName": "Text Shot",
-  "version": "0.4.0",
+  "version": "1.1.0",
   "description": "Fast macOS background OCR utility",
-  "main": "dist/main/main.js",
   "author": "",
   "license": "UNLICENSED",
   "scripts": {
     "clean": "bash scripts/clean-generated.sh",
-    "version:bump": "npm version minor --no-git-tag-version",
-    "build": "npm run clean && npm run build:ts && npm run copy:renderer && npm run build:helper && npm run copy:helper && npm run build:settings-app && npm run copy:settings-app",
-    "build:ts": "tsc -p tsconfig.json",
-    "copy:renderer": "mkdir -p dist/renderer && cp src/renderer/settings.html src/renderer/settings.css dist/renderer/",
-    "build:helper": "bash scripts/build-helper.sh",
-    "copy:helper": "bash scripts/copy-helper.sh",
-    "build:settings-app": "bash scripts/build-settings-app.sh",
-    "copy:settings-app": "bash scripts/copy-settings-app.sh",
-    "dev": "npm run build:ts && electron .",
-    "start": "electron .",
-    "test": "vitest run",
-    "typecheck": "tsc -p tsconfig.json --noEmit",
-    "dist": "npm run version:bump && npm run build && electron-builder --mac",
-    "dist:publish": "npm run version:bump && npm run build && electron-builder --mac --publish always"
-  },
-  "dependencies": {
-    "electron-updater": "^6.6.2"
-  },
-  "devDependencies": {
-    "@types/node": "^22.10.2",
-    "electron": "^34.0.0",
-    "electron-builder": "^25.1.8",
-    "typescript": "^5.7.2",
-    "vitest": "^2.1.8"
-  },
-  "build": {
-    "extends": null,
-    "appId": "com.premsathisha.textshot",
-    "productName": "Text Shot",
-    "files": [
-      "dist/**/*",
-      "assets/**/*",
-      "package.json"
-    ],
-    "extraResources": [
-      {
-        "from": "bin/ocr-helper",
-        "to": "bin/ocr-helper"
-      },
-      {
-        "from": "bin/text-shot-settings",
-        "to": "bin/text-shot-settings"
-      }
-    ],
-    "mac": {
-      "icon": "assets/app-icon.png",
-      "category": "public.app-category.productivity",
-      "target": [
-        "dmg",
-        "zip"
-      ],
-      "hardenedRuntime": true,
-      "entitlements": "build/entitlements.mac.plist",
-      "entitlementsInherit": "build/entitlements.mac.inherit.plist",
-      "extendInfo": {
-        "LSUIElement": true
-      }
-    },
-    "afterSign": "scripts/notarize.js",
-    "generateUpdatesFilesForAllChannels": true,
-    "publish": [
-      {
-        "provider": "github",
-        "owner": "premsathisha",
-        "repo": "textshot",
-        "releaseType": "release"
-      }
-    ]
+    "build": "bash scripts/build-settings-app.sh",
+    "start": "open \"./bin/Text Shot.app\"",
+    "dev": "npm run build && npm run start",
+    "test": "bash scripts/typecheck-native.sh",
+    "typecheck": "bash scripts/typecheck-native.sh",
+    "release:native": "bash scripts/release-native.sh",
+    "release:native:cutover": "bash scripts/release-native.sh --cutover-1-0-0",
+    "release:native:minor": "bash scripts/release-native.sh --bump-minor",
+    "dist": "bash scripts/release-native.sh --bump-minor",
+    "dist:cutover": "bash scripts/release-native.sh --cutover-1-0-0"
   }
 }

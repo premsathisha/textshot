@@ -1,135 +1,104 @@
 # Text Shot
 
-Menu bar macOS utility for fast region OCR: hotkey -> drag capture -> local Vision OCR -> clipboard copy.
+Native macOS menu bar OCR utility in Swift.
 
-## Highlights
+Flow: global hotkey -> region capture -> Vision OCR (local) -> clipboard -> optional auto-paste.
 
-- Menu bar only (`LSUIElement`), no Dock UI in packaged builds.
-- Native capture using `/usr/sbin/screencapture -i -x`.
-- Local OCR only via Apple Vision (Swift helper).
-- Retry chain in Electron:
-  1. Accurate + language correction ON
-  2. Accurate + language correction OFF
-  3. Fast
-- Optional auto-paste (OFF by default), guarded by Accessibility permission.
-- No analytics SDK, no cloud APIs, no text/image payload logging.
+## Architecture
 
-## Project Layout
+- `native/settings-app`: Primary native Swift app (menu bar runtime + settings UI)
+  - `AppController`: orchestration for capture/OCR/clipboard/permissions
+  - `HotkeyManager`: global hotkey registration via Carbon
+  - `SettingsStoreV2` + `SettingsMigrator`: `settings-v2.json` migration/persistence
+  - `ToastPresenter`: native HUD-style confirmation panel
+- `scripts/build-settings-app.sh`: builds universal binary + app bundle (`bin/Text Shot.app`)
+- `scripts/release-native.sh`: version bump + DMG generation + optional notarization
 
-- `src/main`: Electron main process (tray, hotkey, capture flow, OCR orchestration, permissions, settings)
-- `src/preload`: Preload bridge for settings window
-- `src/renderer`: Minimal settings UI
-- `native/ocr-helper`: Swift CLI (Vision OCR)
-- `scripts`: Helper build/copy and notarization hook
-- `build`: Entitlements templates
-- `tests`: Unit and e2e scaffolding
+## Settings Schema (v2)
 
-## Local Build
+Stored at:
 
-Prerequisites:
+- `~/Library/Application Support/Text Shot/settings-v2.json`
 
-- macOS 13+
-- Xcode Command Line Tools
-- Swift 5.9+
-- Node.js 20+
+Schema:
 
-Install dependencies:
-
-```bash
-npm install
+```json
+{
+  "schemaVersion": 2,
+  "hotkey": "CommandOrControl+Shift+2",
+  "showConfirmation": true,
+  "launchAtLogin": false,
+  "autoPaste": false,
+  "lastPermissionPromptAt": 0,
+  "lastAccessibilityPromptAt": 0
+}
 ```
 
-Build TypeScript + helper:
+Notes:
+
+- `debugMode` was removed.
+- Updater-related settings were removed.
+- One-time migration reads legacy `settings.json` from old Electron locations.
+
+## Hotkey Rules
+
+Allowed:
+
+- Any shortcut with one or more modifiers (`Command`, `Control`, `Option`, `Shift`)
+- Modifier-free function keys (`F1` ... `F24`)
+
+Blocked:
+
+- Printable keys without modifiers (`K`, `3`, `Space`, etc.)
+
+On hotkey registration failure, the previous active shortcut remains active.
+
+## Build
 
 ```bash
 npm run build
 ```
 
-Run app:
+Output:
+
+- `bin/text-shot` (universal binary)
+- `bin/Text Shot.app`
+
+## Run
 
 ```bash
 npm start
 ```
 
-## Development Notes
-
-- Default hotkey: `CommandOrControl+Shift+2`
-- Helper binary expected at `bin/ocr-helper` for local runs.
-- In debug mode, capture temp image is retained; otherwise deleted immediately.
-
-## Helper Build Details
-
-Build universal helper manually:
+## Test
 
 ```bash
-bash scripts/build-helper.sh
+npm test
 ```
 
-This creates:
+## Release / DMG
 
-- `bin/ocr-helper` (arm64 + x86_64 universal)
-
-## Permissions and Troubleshooting
-
-Screen Recording denial behavior:
-
-- Prompt appears only after user-triggered hotkey capture fails.
-- Modal includes:
-  - Deep link attempt to Screen Recording settings
-  - Manual path: `System Settings -> Privacy & Security -> Screen Recording`
-
-Auto-paste Accessibility behavior:
-
-- Only applies when `Auto-paste` is enabled.
-- On failure, app keeps clipboard copy successful and shows guidance:
-  - `System Settings -> Privacy & Security -> Accessibility`
-
-## Packaging
-
-Create distributables:
+Cutover release (`1.0.0`):
 
 ```bash
-npm run dist
+npm run release:native:cutover
 ```
 
-Configured outputs:
+Future releases (minor only):
 
-- `dmg`
-- `zip`
+```bash
+npm run release:native:minor
+```
 
-Key packaging settings:
+Rules:
 
-- Hardened runtime enabled
-- Entitlements templates:
-  - `build/entitlements.mac.plist`
-  - `build/entitlements.mac.inherit.plist`
-- Helper bundled as extra resource: `Resources/bin/ocr-helper`
+- First native release is `1.0.0`
+- Future releases bump minor only (`1.1.0`, `1.2.0`, ...)
+- DMG output name: `Text Shot-<version>.dmg`
+- Copied to `release/` with SHA-256 checksum
 
-## Notarization-Ready Setup
-
-`electron-builder` calls `scripts/notarize.js` after signing stage.
-
-The hook checks for:
+Notarization env vars (optional but recommended):
 
 - `APPLE_ID`
-- `APPLE_APP_SPECIFIC_PASSWORD`
 - `APPLE_TEAM_ID`
-
-If missing, notarization is skipped intentionally.
-
-Typical release flow:
-
-1. Sign app in release pipeline with Developer ID.
-2. Export Apple credentials via environment variables.
-3. Run `npm run dist` in CI with signing enabled.
-4. Submit notarization and staple as part of release pipeline.
-
-## Distribution Checklist
-
-- Verify tray app launches as menu bar utility.
-- Verify global hotkey capture and OCR flow.
-- Verify temp cleanup when debug mode is off.
-- Verify permission modals and manual guidance text.
-- Verify auto-paste fallback (copy still works if Accessibility denied).
-- Verify helper exists inside packaged app resources.
-- Verify no analytics/network dependencies are introduced.
+- `APPLE_APP_SPECIFIC_PASSWORD`

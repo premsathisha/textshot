@@ -11,6 +11,7 @@ GENERATED_PATHS=(
   "native/ocr-helper/.build"
   "native/settings-app/.build"
   "dist"
+  "dist-native"
   "release"
   "bin"
   "resources/bin"
@@ -25,5 +26,6 @@ if [[ "${REMOVE_NODE_MODULES:-0}" == "1" ]]; then
 fi
 
 find . -maxdepth 1 -type d -name '(A Document Being Saved By swift-build*' -exec rm -rf -- {} +
+find . -maxdepth 1 -type d -name '(A Document Being Saved By swift-test*' -exec rm -rf -- {} +
 
 echo "Removed generated artifacts and caches."

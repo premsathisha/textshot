@@ -56,6 +56,7 @@ struct ShortcutAvailabilityChecker: ShortcutAvailabilityChecking {
         }
 
         let normalizedModifiers = modifiers & Self.relevantModifierMask
+
         for value in entries.values {
             guard
                 let entry = value as? [String: Any],
@@ -96,7 +97,7 @@ struct ShortcutAvailabilityChecker: ShortcutAvailabilityChecking {
 
     private static func probeRegistration(keyCode: UInt32, modifiers: UInt32) -> Bool {
         var hotkeyRef: EventHotKeyRef?
-        let hotkeyID = EventHotKeyID(signature: OSType(0x54534854), id: UInt32(1))
+        let hotkeyID = EventHotKeyID(signature: OSType(0x54534854), id: UInt32(999))
         let status = RegisterEventHotKey(
             keyCode,
             modifiers,
@@ -105,13 +106,15 @@ struct ShortcutAvailabilityChecker: ShortcutAvailabilityChecking {
             OptionBits(0),
             &hotkeyRef
         )
-        if status == noErr {
-            if let hotkeyRef {
-                UnregisterEventHotKey(hotkeyRef)
-            }
-            return true
+
+        guard status == noErr else {
+            return false
         }
 
-        return false
+        if let hotkeyRef {
+            UnregisterEventHotKey(hotkeyRef)
+        }
+
+        return true
     }
 }

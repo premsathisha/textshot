@@ -1,48 +1,35 @@
-import XCTest
+import Foundation
+import Testing
 @testable import TextShotSettings
 
-final class SettingsFileStoreTests: XCTestCase {
-    func testSaveRoundTripAndMetadataPreservation() throws {
-        let tempDir = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(UUID().uuidString)
-        try FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
-        defer { try? FileManager.default.removeItem(at: tempDir) }
+@Test
+func settingsStoreRoundTripPreservesPromptMetadata() throws {
+    let tempDir = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(UUID().uuidString)
+    try FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
+    defer { try? FileManager.default.removeItem(at: tempDir) }
 
-        let fileURL = tempDir.appendingPathComponent("settings.json")
-        let initial = PersistedSettings(
-            hotkey: "CommandOrControl+Shift+2",
-            showConfirmation: true,
-            launchAtLogin: false,
-            debugMode: false,
-            autoPaste: false,
-            lastPermissionPromptAt: 123,
-            lastAccessibilityPromptAt: 456
-        )
+    let fileURL = tempDir.appendingPathComponent("settings-v2.json")
+    let store = SettingsStoreV2(fileURL: fileURL)
 
-        let initialData = try JSONEncoder().encode(initial)
-        try initialData.write(to: fileURL)
+    var initial = AppSettingsV2.defaults
+    initial.lastPermissionPromptAt = 111
+    initial.lastAccessibilityPromptAt = 222
+    _ = try store.save(initial)
 
-        let store = SettingsFileStore(fileURL: fileURL)
-        let loaded = try store.load()
-
-        let edited = EditableSettings(
-            hotkey: "Control+Alt+K",
-            showConfirmation: false,
-            launchAtLogin: true,
-            debugMode: true,
-            autoPaste: true
-        )
-
-        let saved = try store.save(editable: edited, preserving: loaded)
-
-        XCTAssertEqual(saved.hotkey, "Control+Alt+K")
-        XCTAssertEqual(saved.showConfirmation, false)
-        XCTAssertEqual(saved.launchAtLogin, true)
-        XCTAssertEqual(saved.debugMode, true)
-        XCTAssertEqual(saved.autoPaste, true)
-        XCTAssertEqual(saved.lastPermissionPromptAt, 123)
-        XCTAssertEqual(saved.lastAccessibilityPromptAt, 456)
-
-        let reread = try store.load()
-        XCTAssertEqual(reread, saved)
+    let saved = try store.update { settings in
+        settings.hotkey = "Control+Alt+K"
+        settings.launchAtLogin = true
+        settings.showConfirmation = false
+        settings.autoPaste = true
     }
+
+    #expect(saved.hotkey == "Control+Alt+K")
+    #expect(saved.launchAtLogin)
+    #expect(saved.showConfirmation == false)
+    #expect(saved.autoPaste)
+    #expect(saved.lastPermissionPromptAt == 111)
+    #expect(saved.lastAccessibilityPromptAt == 222)
+
+    let reread = store.load()
+    #expect(reread == saved)
 }

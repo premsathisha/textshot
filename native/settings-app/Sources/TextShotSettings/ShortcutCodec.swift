@@ -41,7 +41,15 @@ enum ShortcutCodec {
         101: "F9",
         109: "F10",
         103: "F11",
-        111: "F12"
+        111: "F12",
+        105: "F13",
+        107: "F14",
+        113: "F15",
+        106: "F16",
+        64: "F17",
+        79: "F18",
+        80: "F19",
+        90: "F20"
     ]
 
     private static let tokenToKeyCodeMap: [String: UInt32] = [
@@ -129,11 +137,18 @@ enum ShortcutCodec {
     }
 
     static func accelerator(modifiers: Set<ShortcutModifier>, key: String?) -> String? {
-        guard !modifiers.isEmpty else { return nil }
-        guard let rawKey = key?.trimmingCharacters(in: .whitespacesAndNewlines), !rawKey.isEmpty else { return nil }
+        guard let rawKey = key?.trimmingCharacters(in: .whitespacesAndNewlines), !rawKey.isEmpty else {
+            return nil
+        }
 
         let normalizedKey = normalizeKey(rawKey)
-        guard isAllowedKeyToken(normalizedKey) else { return nil }
+        guard isAllowedKeyToken(normalizedKey) else {
+            return nil
+        }
+
+        if modifiers.isEmpty && !isFunctionKey(normalizedKey) {
+            return nil
+        }
 
         var parts: [String] = []
 
@@ -151,10 +166,6 @@ enum ShortcutCodec {
             parts.append("Shift")
         }
 
-        if parts.isEmpty {
-            return nil
-        }
-
         parts.append(normalizedKey)
         return parts.joined(separator: "+")
     }
@@ -166,36 +177,40 @@ enum ShortcutCodec {
         }
 
         let parts = value.split(separator: "+").map { String($0) }
-        if parts.count < 2 {
-            return "Shortcut must include at least one modifier and one key."
-        }
+        let keyRaw = parts.last ?? ""
+        let normalizedKey = normalizeKey(keyRaw)
 
-        let key = normalizeKey(parts[parts.count - 1])
-        if !isAllowedKeyToken(key) {
+        if !isAllowedKeyToken(normalizedKey) {
             return "Shortcut key is not supported."
         }
 
-        let modifiers = Set(parts.dropLast().map { normalizeModifier($0) })
-        let allowedModifiers: Set<String> = ["COMMAND", "COMMANDORCONTROL", "CONTROL", "CTRL", "ALT", "OPTION", "SHIFT"]
-        if modifiers.isEmpty || !modifiers.isSubset(of: allowedModifiers) {
-            return "Shortcut modifiers are invalid."
+        if parts.count == 1 && !isFunctionKey(normalizedKey) {
+            return "Shortcut must include at least one modifier, or use an F-key."
+        }
+
+        if parts.count >= 2 {
+            let modifiers = Set(parts.dropLast().map { normalizeModifier($0) })
+            let allowedModifiers: Set<String> = ["COMMAND", "COMMANDORCONTROL", "CONTROL", "CTRL", "ALT", "OPTION", "SHIFT"]
+            if modifiers.isEmpty || !modifiers.isSubset(of: allowedModifiers) {
+                return "Shortcut modifiers are invalid."
+            }
         }
 
         return nil
     }
 
     static func parseAccelerator(_ rawValue: String) -> (modifiers: Set<ShortcutModifier>, key: String)? {
+        if validateAccelerator(rawValue) != nil {
+            return nil
+        }
+
         let value = rawValue.trimmingCharacters(in: .whitespacesAndNewlines)
         let parts = value.split(separator: "+").map { String($0) }
-        guard parts.count >= 2 else { return nil }
-
-        let normalizedKey = normalizeKey(parts[parts.count - 1])
-        guard isAllowedKeyToken(normalizedKey) else { return nil }
+        let normalizedKey = normalizeKey(parts.last ?? "")
 
         var modifiers = Set<ShortcutModifier>()
         for rawModifier in parts.dropLast() {
-            let modifier = normalizeModifier(rawModifier)
-            switch modifier {
+            switch normalizeModifier(rawModifier) {
             case "COMMAND", "COMMANDORCONTROL":
                 modifiers.insert(.command)
             case "CONTROL", "CTRL":
@@ -209,7 +224,6 @@ enum ShortcutCodec {
             }
         }
 
-        guard !modifiers.isEmpty else { return nil }
         return (modifiers: modifiers, key: normalizedKey)
     }
 
@@ -261,10 +275,14 @@ enum ShortcutCodec {
             return true
         }
 
-        if key.range(of: "^F([1-9]|1[0-9]|2[0-4])$", options: .regularExpression) != nil {
+        if isFunctionKey(key) {
             return true
         }
 
         return allowedSpecialKeys.contains(key)
+    }
+
+    private static func isFunctionKey(_ key: String) -> Bool {
+        key.range(of: "^F([1-9]|1[0-9]|2[0-4])$", options: .regularExpression) != nil
     }
 }

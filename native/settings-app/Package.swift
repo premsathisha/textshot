@@ -7,12 +7,19 @@ let package = Package(
         .macOS(.v13)
     ],
     products: [
-        .executable(name: "text-shot-settings", targets: ["TextShotSettings"])
+        .executable(name: "text-shot", targets: ["TextShotSettings"])
     ],
     targets: [
         .executableTarget(
             name: "TextShotSettings",
-            path: "Sources/TextShotSettings"
+            path: "Sources/TextShotSettings",
+            linkerSettings: [
+                .linkedFramework("SwiftUI"),
+                .linkedFramework("AppKit"),
+                .linkedFramework("Carbon"),
+                .linkedFramework("Vision"),
+                .linkedFramework("ServiceManagement")
+            ]
         ),
         .testTarget(
             name: "TextShotSettingsTests",

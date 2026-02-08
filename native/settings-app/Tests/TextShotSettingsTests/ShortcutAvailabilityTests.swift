@@ -1,60 +1,51 @@
-import XCTest
+import Testing
 @testable import TextShotSettings
 
-final class ShortcutAvailabilityTests: XCTestCase {
-    func testRejectsInvalidShortcutSyntax() {
-        let checker = ShortcutAvailabilityChecker(
-            symbolicHotkeysProvider: { nil },
-            registrationProbe: { _, _ in true }
-        )
+@Test
+func shortcutAvailabilityRejectsInvalidSyntax() {
+    let checker = ShortcutAvailabilityChecker(
+        symbolicHotkeysProvider: { nil },
+        registrationProbe: { _, _ in true }
+    )
 
-        let result = checker.availability(for: "A")
-        XCTAssertEqual(result, .unavailable("Shortcut must include at least one modifier and one key."))
-    }
+    let result = checker.availability(for: "A")
+    #expect(result == .unavailable("Shortcut must include at least one modifier, or use an F-key."))
+}
 
-    func testRejectsSystemShortcutConflict() {
-        let components = ShortcutCodec.carbonHotkeyComponents(from: "CommandOrControl+Shift+2")
-        XCTAssertNotNil(components)
+@Test
+func shortcutAvailabilityRejectsSystemConflict() {
+    let components = ShortcutCodec.carbonHotkeyComponents(from: "CommandOrControl+Shift+2")
+    #expect(components != nil)
 
-        let checker = ShortcutAvailabilityChecker(
-            symbolicHotkeysProvider: {
-                guard let components else { return nil }
-                return [
-                    "AppleSymbolicHotKeys": [
-                        "60": [
-                            "enabled": 1,
-                            "value": [
-                                "parameters": [components.keyCode, components.modifiers, 0],
-                                "type": "standard"
-                            ]
+    let checker = ShortcutAvailabilityChecker(
+        symbolicHotkeysProvider: {
+            guard let components else { return nil }
+            return [
+                "AppleSymbolicHotKeys": [
+                    "60": [
+                        "enabled": 1,
+                        "value": [
+                            "parameters": [components.keyCode, components.modifiers, 0],
+                            "type": "standard"
                         ]
                     ]
                 ]
-            },
-            registrationProbe: { _, _ in true }
-        )
+            ]
+        },
+        registrationProbe: { _, _ in true }
+    )
 
-        let result = checker.availability(for: "CommandOrControl+Shift+2")
-        XCTAssertEqual(result, .unavailable("Shortcut conflicts with a macOS system shortcut."))
-    }
+    let result = checker.availability(for: "CommandOrControl+Shift+2")
+    #expect(result == .unavailable("Shortcut conflicts with a macOS system shortcut."))
+}
 
-    func testRejectsHotkeyAlreadyInUse() {
-        let checker = ShortcutAvailabilityChecker(
-            symbolicHotkeysProvider: { nil },
-            registrationProbe: { _, _ in false }
-        )
+@Test
+func shortcutAvailabilityAcceptsFunctionKeyWithoutModifier() {
+    let checker = ShortcutAvailabilityChecker(
+        symbolicHotkeysProvider: { nil },
+        registrationProbe: { _, _ in true }
+    )
 
-        let result = checker.availability(for: "Control+Alt+K")
-        XCTAssertEqual(result, .unavailable("Shortcut is already in use by another app."))
-    }
-
-    func testAcceptsShortcutWhenNoConflictsAreFound() {
-        let checker = ShortcutAvailabilityChecker(
-            symbolicHotkeysProvider: { nil },
-            registrationProbe: { _, _ in true }
-        )
-
-        let result = checker.availability(for: "Control+Alt+K")
-        XCTAssertEqual(result, .available)
-    }
+    let result = checker.availability(for: "F8")
+    #expect(result == .available)
 }

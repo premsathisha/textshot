@@ -1,72 +1,74 @@
 import AppKit
-import Darwin
 import SwiftUI
 
 private enum Bootstrap {
-    static func settingsURL() -> URL {
-        do {
-            return try SettingsArguments.settingsFileURL(from: CommandLine.arguments)
-        } catch {
-            fputs("\(error.localizedDescription)\n", stderr)
-            exit(2)
-        }
+    @MainActor
+    static func appController() -> AppController {
+        let migrator = SettingsMigrator()
+        let store = (try? migrator.prepareStore()) ?? SettingsStoreV2(fileURL: fallbackSettingsURL())
+        return AppController(settingsStore: store)
+    }
+
+    private static func fallbackSettingsURL() -> URL {
+        let base = FileManager.default.homeDirectoryForCurrentUser
+            .appendingPathComponent("Library/Application Support/Text Shot", isDirectory: true)
+        try? FileManager.default.createDirectory(at: base, withIntermediateDirectories: true)
+        return base.appendingPathComponent("settings-v2.json")
     }
 }
 
-final class SettingsAppDelegate: NSObject, NSApplicationDelegate {
-    private var refocusSignalSource: DispatchSourceSignal?
+@MainActor
+final class AppDelegate: NSObject, NSApplicationDelegate {
+    private let controller = Bootstrap.appController()
+    private let relocator = AppRelocator()
+    private var statusItem: NSStatusItem?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        signal(SIGUSR1, SIG_IGN)
-        let signalSource = DispatchSource.makeSignalSource(signal: SIGUSR1, queue: .main)
-        signalSource.setEventHandler { [weak self] in
-            self?.activateSettingsWindow()
-        }
-        signalSource.resume()
-        refocusSignalSource = signalSource
-
-        activateSettingsWindow()
+        relocator.promptToMoveIfNeeded()
+        setupStatusItem()
     }
 
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
-        true
+        false
     }
 
-    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
-        activateSettingsWindow()
-        return true
+    private func setupStatusItem() {
+        let statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
+        statusItem.button?.title = "Text Shot"
+
+        let menu = NSMenu()
+        menu.addItem(withTitle: "Capture Text", action: #selector(captureText), keyEquivalent: "")
+        menu.addItem(.separator())
+        menu.addItem(withTitle: "Settings...", action: #selector(openSettings), keyEquivalent: ",")
+        menu.addItem(.separator())
+        menu.addItem(withTitle: "Quit", action: #selector(quitApp), keyEquivalent: "q")
+
+        menu.items.forEach { $0.target = self }
+
+        statusItem.menu = menu
+        self.statusItem = statusItem
     }
 
-    func applicationWillTerminate(_ notification: Notification) {
-        refocusSignalSource?.cancel()
-        refocusSignalSource = nil
+    @objc private func captureText() {
+        controller.captureNow()
     }
 
-    private func activateSettingsWindow() {
-        NSApp.activate(ignoringOtherApps: true)
+    @objc private func openSettings() {
+        controller.openSettings()
+    }
 
-        let window = NSApp.keyWindow ?? NSApp.windows.first
-        guard let window else { return }
-
-        if window.isMiniaturized {
-            window.deminiaturize(nil)
-        }
-
-        window.makeKeyAndOrderFront(nil)
-        window.orderFrontRegardless()
+    @objc private func quitApp() {
+        NSApp.terminate(nil)
     }
 }
 
 @main
-struct TextShotSettingsApp: App {
-    @NSApplicationDelegateAdaptor(SettingsAppDelegate.self) private var appDelegate
-    @StateObject private var model = SettingsViewModel(settingsURL: Bootstrap.settingsURL())
+struct TextShotApp: App {
+    @NSApplicationDelegateAdaptor(AppDelegate.self) private var delegate
 
     var body: some Scene {
-        WindowGroup("Text Shot Settings") {
-            ContentView()
-                .environmentObject(model)
+        Settings {
+            EmptyView()
         }
-        .windowResizability(.contentSize)
     }
 }

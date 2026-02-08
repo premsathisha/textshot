@@ -4,33 +4,30 @@ This file provides guidance to Codex when working with code in this repository.
 
 ## High-level Architecture
 
-This project is a menu bar macOS utility for fast region OCR. It is an Electron application with a native Swift helper for OCR.
+This project is a native menu bar macOS utility for fast region OCR. It is now a Swift application (no Electron runtime).
 
-- `src/main`: Electron main process (tray, hotkey, capture flow, OCR orchestration, permissions, settings)
-- `src/preload`: Preload bridge for settings window
-- `src/renderer`: Minimal settings UI
-- `native/ocr-helper`: Swift CLI for local OCR using Apple Vision.
-- `scripts`: Helper scripts for building, copying, and notarization.
-- `build`: Entitlements templates for macOS.
-- `tests`: Unit and e2e tests.
+- `native/settings-app`: Main Swift app runtime (status item, hotkey, capture flow, OCR, settings, permissions, toast)
+- `scripts`: Build/release helpers for universal binaries and DMG generation
+- `build`: Release configuration files (including native export options)
 
 ## Common Commands
 
-- `npm install`: Install dependencies.
-- `npm run dev`: Run the app in development mode.
-- `npm run build`: Build TypeScript and the Swift helper.
-- `npm start`: Run the built app.
-- `npm test`: Run tests with vitest.
-- `npm run dist`: Package the application for distribution.
-- `npm run clean`: Remove generated files (`dist`, `bin`, `release`).
-- `bash scripts/build-helper.sh`: Manually build the universal Swift OCR helper.
-- `npm run typecheck`: Typecheck the project.
+- `npm run build`: Build universal native binary and app bundle (`bin/Text Shot.app`)
+- `npm start`: Launch the native app bundle
+- `npm test`: Native compile-check smoke test
+- `npm run typecheck`: Compile-check native Swift package
+- `npm run clean`: Remove generated files (`bin`, `dist`, `dist-native`, `release`, Swift caches)
 
 ## Release Requirements (Mandatory Every Edit Cycle)
 
-- Bump app version by `+0.1` after making code edits:
-  - `npm version minor --no-git-tag-version`
-- Rebuild and regenerate distribution artifacts (including DMG):
-  - `npm run build && npx electron-builder --mac`
-- Copy the latest DMG artifacts into `release/`:
-  - `mkdir -p release && cp -f dist/*.dmg dist/*.dmg.blockmap release/`
+- Keep semantic version in `package.json` aligned with native release policy.
+- Build native app bundle:
+  - `npm run build`
+- Build DMG and copy artifacts to `release/`:
+  - `npm run release:native:minor`
+
+## Version Policy
+
+- Native cutover release: `1.0.0`
+- Future updates: bump minor only (`1.1.0`, `1.2.0`, ...)
+- No patch versions unless explicitly requested
