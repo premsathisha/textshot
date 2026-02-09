@@ -156,11 +156,14 @@ if [[ "$SKIP_NOTARIZE" -eq 0 ]]; then
 fi
 
 DMG_NAME="$APP_NAME-$TARGET_VERSION.dmg"
-DMG_PATH="$ROOT_DIR/dist-native/$DMG_NAME"
-STAGING_DIR="$(mktemp -d "$ROOT_DIR/dist-native/dmg-staging.XXXXXX")"
+DMG_TEMP_DIR="$(mktemp -d "/tmp/text-shot-dmg.XXXXXX")"
+DMG_PATH="$DMG_TEMP_DIR/$DMG_NAME"
+STAGING_DIR="$DMG_TEMP_DIR/staging"
 VOLUME_NAME="$APP_NAME Installer"
+mkdir -p "$STAGING_DIR"
 cleanup() {
-  rm -rf "$STAGING_DIR"
+  rm -rf "$DMG_TEMP_DIR"
+  find "$ROOT_DIR/dist-native" -maxdepth 1 -type f -name "$APP_NAME-*.dmg" -delete 2>/dev/null || true
 }
 trap cleanup EXIT
 

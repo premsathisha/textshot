@@ -4,17 +4,18 @@ This file provides guidance to Codex when working with code in this repository.
 
 ## High-level Architecture
 
-This project is a native menu bar macOS utility for fast region OCR. It is now a Swift application (no Electron runtime).
+This project is a native Swift menu bar macOS utility for fast region OCR. There is no Electron runtime.
 
 - `native/settings-app`: Main Swift app runtime (status item, hotkey, capture flow, OCR, settings, permissions, toast)
-- `scripts`: Build/release helpers for universal binaries and DMG generation
-- `build`: Release configuration files (including native export options)
+- `scripts`: Build/test/release helpers
+- `build`: Release configuration files (export options, entitlements)
+- `assets`: App icon and tray assets
 
 ## Common Commands
 
 - `npm run build`: Build universal native binary and app bundle (`bin/Text Shot.app`)
 - `npm start`: Launch the native app bundle
-- `npm test`: Native compile-check smoke test
+- `npm test`: Native unit tests (`swift test`)
 - `npm run typecheck`: Compile-check native Swift package
 - `npm run clean`: Remove generated files (`bin`, `dist`, `dist-native`, `release`, Swift caches)
 
@@ -25,6 +26,8 @@ This project is a native menu bar macOS utility for fast region OCR. It is now a
   - `npm run build`
 - Build DMG and copy artifacts to `release/`:
   - `npm run release:native:minor`
+- Ensure `release/` contains only the latest DMG and matching `.sha256`.
+- `dist-native/` is transient/internal and must not be used as a distribution location.
 
 ## Version Policy
 

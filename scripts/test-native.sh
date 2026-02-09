@@ -5,7 +5,7 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PACKAGE_DIR="$ROOT_DIR/native/settings-app"
 MODULE_CACHE_DIR="$ROOT_DIR/.swiftpm-module-cache"
 CLANG_CACHE_DIR="$ROOT_DIR/.clang-module-cache"
-SCRATCH_PATH="$PACKAGE_DIR/.build/test"
+SCRATCH_PATH="/tmp/text-shot-settings-test"
 
 mkdir -p "$MODULE_CACHE_DIR" "$CLANG_CACHE_DIR"
 

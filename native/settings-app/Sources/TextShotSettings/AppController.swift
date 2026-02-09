@@ -81,8 +81,9 @@ final class AppController {
 
         let window = NSWindow(contentViewController: hosting)
         window.title = "Settings"
+        window.titleVisibility = .hidden
         window.styleMask = [.titled, .closable, .miniaturizable]
-        window.setContentSize(NSSize(width: 420, height: 270))
+        window.setContentSize(NSSize(width: 360, height: 188))
         window.center()
         window.isReleasedWhenClosed = false
 

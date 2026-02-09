@@ -1,38 +1,31 @@
-import AppKit
 import Foundation
-import ShortcutRecorder
+import KeyboardShortcuts
 import Testing
 @testable import TextShotSettings
 
 private final class MockHotkeyController: HotkeyManaging, HotkeyRecorderBindingProviding {
     var onHotkeyPressed: (() -> Void)?
-    var onShortcutChanged: ((Shortcut) -> Void)?
-    var activeShortcut: Shortcut?
+    var onShortcutChanged: ((AppHotkeyShortcut?) -> Void)?
+    var activeShortcut: AppHotkeyShortcut?
     var applyError: Error?
     var resetError: Error?
-
-    let defaultsController: NSUserDefaultsController = .shared
-    let defaultsKeyPath = HotkeyManager.defaultsKeyPath
-    let bindingOptions: [NSBindingOption: Any] = [
-        .valueTransformerName: NSValueTransformerName.keyedUnarchiveFromDataTransformerName
-    ]
+    let recorderName: KeyboardShortcuts.Name = .globalCaptureHotkey
     var recorderAvailabilityIssue: String?
 
-    init() {}
-
     @discardableResult
-    func apply(shortcut: Shortcut) throws -> Shortcut {
+    func apply(shortcut: AppHotkeyShortcut?) throws -> AppHotkeyShortcut? {
         if let applyError {
             throw applyError
         }
 
+        try validateForRecorder(shortcut)
         activeShortcut = shortcut
         onShortcutChanged?(shortcut)
         return shortcut
     }
 
     @discardableResult
-    func resetToDefault() throws -> Shortcut {
+    func resetToDefault() throws -> AppHotkeyShortcut {
         if let resetError {
             throw resetError
         }
@@ -42,10 +35,7 @@ private final class MockHotkeyController: HotkeyManaging, HotkeyRecorderBindingP
         return HotkeyManager.defaultShortcut
     }
 
-    func validateForRecorder(_ shortcut: Shortcut) throws {
-        if let applyError {
-            throw applyError
-        }
+    func validateForRecorder(_ shortcut: AppHotkeyShortcut?) throws {
         try HotkeyManager.validateNoModifierRule(shortcut)
     }
 }
@@ -257,7 +247,7 @@ func appControllerApplyShortcutReturnsErrorMessage() throws {
 
     let hotkeys = MockHotkeyController()
     hotkeys.activeShortcut = HotkeyManager.defaultShortcut
-    hotkeys.applyError = HotkeyApplyError.conflict(message: "Shortcut is already in use.")
+    hotkeys.applyError = HotkeyApplyError.invalidShortcut
 
     let capture = MockCaptureService(
         result: CaptureResult(canceled: true, path: nil, error: nil, failureReason: nil)
@@ -280,16 +270,16 @@ func appControllerApplyShortcutReturnsErrorMessage() throws {
         installStartupStateOnInit: false
     )
 
-    let requested = Shortcut(keyEquivalent: "⌃⌥K")!
+    let requested = AppHotkeyShortcut(.a, modifiers: [])
     let result = controller.applyShortcutForTesting(requested)
 
     switch result {
     case .success:
         Issue.record("Expected failure for apply error")
     case .failure(let error):
-        #expect(error.displayMessage == "Shortcut is already in use.")
+        #expect(error.displayMessage == "Unsupported shortcut. Use one or more modifiers, or an F-key.")
     }
 
     #expect(toast.messages.isEmpty)
-    #expect(hotkeys.activeShortcut?.isEqual(HotkeyManager.defaultShortcut) == true)
+    #expect(hotkeys.activeShortcut == HotkeyManager.defaultShortcut)
 }

@@ -1,105 +1,84 @@
 # Text Shot
 
-Native macOS menu bar OCR utility in Swift.
+Text Shot is a native macOS menu bar OCR utility written in Swift.
 
-Flow: global hotkey -> region capture -> Vision OCR (local) -> clipboard -> optional auto-paste.
+Flow: global hotkey -> region capture -> Vision OCR (local) -> clipboard.
 
 ## Architecture
 
-- `native/settings-app`: Primary native Swift app (menu bar runtime + settings UI)
-  - `AppController`: orchestration for capture/OCR/clipboard/permissions
-  - `HotkeyManager`: global hotkey registration via Carbon
-  - `SettingsStoreV2` + `SettingsMigrator`: `settings-v2.json` migration/persistence
-  - `ToastPresenter`: native HUD-style confirmation panel
-- `scripts/build-settings-app.sh`: builds universal binary + app bundle (`bin/Text Shot.app`)
-- `scripts/release-native.sh`: version bump + DMG generation + optional notarization
+- `native/settings-app`: Native runtime and settings UI
+  - `AppController`: capture/OCR/clipboard/permissions orchestration
+  - `HotkeyManager` + `HotkeyBindingController`: global hotkey rules and registration
+  - `SettingsStoreV2` + `SettingsMigrator`: migration and persistence for `settings-v3.json`
+  - `ToastPresenter`: native confirmation HUD
+- `scripts/build-settings-app.sh`: builds universal binary and app bundle in `bin/`
+- `scripts/release-native.sh`: bumps version and creates release DMG artifacts
+- `build/`: export options and entitlements for release tooling
 
-## Settings Schema (v2)
+## Requirements
+
+- macOS 13+
+- Xcode command-line tools (`swift`, `xcodebuild`, `codesign`, `hdiutil`)
+- Node.js + npm
+
+## Commands
+
+- `npm run build`: Build universal binary and app bundle (`bin/text-shot`, `bin/Text Shot.app`)
+- `npm start`: Launch the built native app bundle
+- `npm run typecheck`: Swift compile-check (`swift build`)
+- `npm test`: Native unit tests (`swift test`)
+- `npm run clean`: Remove generated artifacts and caches (`bin`, `dist`, `dist-native`, `release`, Swift caches)
+- `npm run release:native:minor`: Bump minor version and produce release DMG + checksum
+- `npm run release:native:cutover`: Force version to `1.0.0` and produce release DMG + checksum
+
+## Settings Schema (v3)
 
 Stored at:
 
-- `~/Library/Application Support/Text Shot/settings-v2.json`
+- `~/Library/Application Support/Text Shot/settings-v3.json`
 
 Schema:
 
 ```json
 {
-  "schemaVersion": 2,
-  "hotkey": "CommandOrControl+Shift+2",
+  "schemaVersion": 3,
+  "hotkey": "Shift+Command+2",
   "showConfirmation": true,
   "launchAtLogin": false,
-  "autoPaste": false,
-  "lastPermissionPromptAt": 0,
-  "lastAccessibilityPromptAt": 0
+  "lastPermissionPromptAt": 0
 }
 ```
 
-Notes:
+Migration notes:
 
-- `debugMode` was removed.
-- Updater-related settings were removed.
-- One-time migration reads legacy `settings.json` from old Electron locations.
+- Existing `settings-v3.json` / `settings-v2.json` is reused when present.
+- A legacy `settings.json` from older builds is imported once when found.
 
 ## Hotkey Rules
 
-Allowed:
+- Allowed:
+  - Any shortcut with one or more modifiers (`Command`, `Control`, `Option`, `Shift`)
+  - Modifier-free function keys (`F1` ... `F20`)
+- Blocked:
+  - Printable keys without modifiers (`A`, `3`, `Space`, etc.)
 
-- Any shortcut with one or more modifiers (`Command`, `Control`, `Option`, `Shift`)
-- Modifier-free function keys (`F1` ... `F24`)
+## Release Artifacts
 
-Blocked:
+- `release/` contains distributable artifacts only:
+  - `Text Shot-<version>.dmg`
+  - `Text Shot-<version>.dmg.sha256`
+- `release/` keeps only the latest DMG + checksum.
+- `dist-native/` is internal/transient release workspace and is not a distribution location.
+- `bin/` is local build output for running and packaging the app.
 
-- Printable keys without modifiers (`K`, `3`, `Space`, etc.)
+## Version Policy
 
-On hotkey registration failure, the previous active shortcut remains active.
+- Native cutover release: `1.0.0`
+- Every new DMG bumps the version.
+- Progression is patchless:
+  - `1.0.0` -> `1.1.0` -> ... -> `1.9.0` -> `2.0.0` -> ...
 
-## Build
-
-```bash
-npm run build
-```
-
-Output:
-
-- `bin/text-shot` (universal binary)
-- `bin/Text Shot.app`
-
-## Run
-
-```bash
-npm start
-```
-
-## Test
-
-```bash
-npm test
-```
-
-## Release / DMG
-
-Cutover release (`1.0.0`):
-
-```bash
-npm run release:native:cutover
-```
-
-Release:
-
-```bash
-npm run release:native:minor
-```
-
-Rules:
-
-- First native release is `1.0.0`
-- Every new DMG bumps version automatically
-- Progression: `1.0.0` -> `1.1.0` -> ... -> `1.9.0` -> `2.0.0` -> ...
-- DMG output name: `Text Shot-<version>.dmg`
-- Stored in `release/` with SHA-256 checksum
-- `release/` retains only the latest DMG + checksum
-
-Notarization env vars (optional but recommended):
+## Optional Notarization Environment Variables
 
 - `APPLE_ID`
 - `APPLE_TEAM_ID`

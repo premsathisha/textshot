@@ -3,7 +3,7 @@ import Testing
 @testable import TextShotSettings
 
 @Test
-func settingsMigratorImportsLegacyJsonIntoV3() throws {
+func settingsMigratorImportsV2SettingsIntoV3() throws {
     let tempDir = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(UUID().uuidString)
     try FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
     defer { try? FileManager.default.removeItem(at: tempDir) }
@@ -11,15 +11,13 @@ func settingsMigratorImportsLegacyJsonIntoV3() throws {
     let legacyDir = tempDir.appendingPathComponent("Text Shot", isDirectory: true)
     try FileManager.default.createDirectory(at: legacyDir, withIntermediateDirectories: true)
 
-    let legacyPath = legacyDir.appendingPathComponent("settings.json")
+    let legacyPath = legacyDir.appendingPathComponent("settings-v2.json")
     let legacyPayload: [String: Any] = [
+        "schemaVersion": 2,
         "hotkey": "Control+Alt+K",
         "showConfirmation": false,
         "launchAtLogin": true,
-        "autoPaste": true,
         "lastPermissionPromptAt": 10,
-        "lastAccessibilityPromptAt": 20,
-        "debugMode": true
     ]
 
     let data = try JSONSerialization.data(withJSONObject: legacyPayload, options: [])

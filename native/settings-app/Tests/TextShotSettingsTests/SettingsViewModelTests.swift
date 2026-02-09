@@ -1,20 +1,30 @@
-import AppKit
-import ShortcutRecorder
+import KeyboardShortcuts
 import Testing
 @testable import TextShotSettings
 
-private final class StubHotkeyController: HotkeyRecorderBindingProviding {
-    let defaultsController: NSUserDefaultsController = .shared
-    let defaultsKeyPath = HotkeyManager.defaultsKeyPath
-    let bindingOptions: [NSBindingOption: Any] = [
-        .valueTransformerName: NSValueTransformerName.keyedUnarchiveFromDataTransformerName
-    ]
-
+private final class StubHotkeyController: HotkeyManaging, HotkeyRecorderBindingProviding {
+    var onHotkeyPressed: (() -> Void)?
+    var onShortcutChanged: ((AppHotkeyShortcut?) -> Void)?
+    var activeShortcut: AppHotkeyShortcut?
+    let recorderName: KeyboardShortcuts.Name = .globalCaptureHotkey
     var recorderAvailabilityIssue: String?
-    var onShortcutChanged: ((Shortcut) -> Void)?
-    var activeShortcut: Shortcut?
 
-    func validateForRecorder(_ shortcut: Shortcut) throws {
+    @discardableResult
+    func apply(shortcut: AppHotkeyShortcut?) throws -> AppHotkeyShortcut? {
+        try validateForRecorder(shortcut)
+        activeShortcut = shortcut
+        onShortcutChanged?(shortcut)
+        return shortcut
+    }
+
+    @discardableResult
+    func resetToDefault() throws -> AppHotkeyShortcut {
+        activeShortcut = HotkeyManager.defaultShortcut
+        onShortcutChanged?(activeShortcut)
+        return HotkeyManager.defaultShortcut
+    }
+
+    func validateForRecorder(_ shortcut: AppHotkeyShortcut?) throws {
         try HotkeyManager.validateNoModifierRule(shortcut)
     }
 }
@@ -61,7 +71,7 @@ func syncHotkeyDisplayUpdatesHotkeyText() {
         onApplySettings: { editable in .success(editable) }
     )
 
-    let shortcut = Shortcut(keyEquivalent: "⌃⌥K")!
+    let shortcut = AppHotkeyShortcut(.k, modifiers: [.control, .option])
     model.syncHotkeyDisplay(with: shortcut)
 
     #expect(model.settings.hotkey == HotkeyManager.displayString(for: shortcut))

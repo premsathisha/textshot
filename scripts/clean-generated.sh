@@ -8,13 +8,11 @@ GENERATED_PATHS=(
   ".DS_Store"
   ".clang-module-cache"
   ".swiftpm-module-cache"
-  "native/ocr-helper/.build"
   "native/settings-app/.build"
   "dist"
   "dist-native"
   "release"
   "bin"
-  "resources/bin"
 )
 
 for path in "${GENERATED_PATHS[@]}"; do

@@ -102,11 +102,10 @@ final class SettingsViewModel: ObservableObject {
 struct SettingsView: View {
     @EnvironmentObject private var model: SettingsViewModel
 
-    private let labelColumnWidth: CGFloat = 170
-    private let controlColumnWidth: CGFloat = 178
+    private let controlColumnWidth: CGFloat = 132
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 22) {
+        VStack(alignment: .leading, spacing: 14) {
             Text("Settings")
                 .font(.system(size: 20, weight: .semibold))
                 .frame(maxWidth: .infinity, alignment: .center)
@@ -119,26 +118,17 @@ struct SettingsView: View {
             )
 
             toggleRow(
-                title: "show confirmation pulse.",
+                title: "Show Confirmation Pulse",
                 isOn: model.showConfirmationBinding
             )
-
-            Spacer(minLength: 0)
         }
-        .padding(.horizontal, 24)
-        .padding(.top, 24)
-        .padding(.bottom, 20)
-        .frame(width: 420, height: 270, alignment: .topLeading)
+        .padding(.horizontal, 18)
+        .padding(.vertical, 14)
+        .frame(width: 360, height: 188, alignment: .topLeading)
     }
 
     private var hotkeyRow: some View {
-        HStack(alignment: .center, spacing: 24) {
-            VStack(alignment: .leading, spacing: 0) {
-                Text("Global Hotkey")
-                    .font(.system(size: 13))
-            }
-            .frame(width: labelColumnWidth, alignment: .leading)
-
+        settingsRow(title: "Global Hotkey") {
             VStack(alignment: .leading, spacing: 6) {
                 if let issue = model.recorderAvailabilityIssue {
                     Text(issue)
@@ -152,18 +142,7 @@ struct SettingsView: View {
                         onError: { model.onRecorderError($0) },
                         onWarning: { model.onRecorderWarning($0) }
                     )
-                    .frame(width: controlColumnWidth, height: 32, alignment: .leading)
-                    .background(
-                        RoundedRectangle(cornerRadius: 6)
-                            .fill(Color(nsColor: .controlBackgroundColor))
-                    )
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 6)
-                            .stroke(
-                                Color(nsColor: .separatorColor),
-                                lineWidth: 1
-                            )
-                    )
+                    .frame(width: controlColumnWidth, height: 28, alignment: .leading)
                 }
 
                 if !model.errorMessage.isEmpty {
@@ -180,21 +159,27 @@ struct SettingsView: View {
                         .frame(width: controlColumnWidth, alignment: .leading)
                 }
             }
-            .frame(width: controlColumnWidth, alignment: .leading)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private func toggleRow(title: String, isOn: Binding<Bool>) -> some View {
-        HStack(alignment: .center, spacing: 24) {
-            Text(title)
-                .font(.system(size: 13))
-            .frame(width: labelColumnWidth, alignment: .leading)
-
+        settingsRow(title: title) {
             Toggle("", isOn: isOn)
                 .labelsHidden()
                 .toggleStyle(.switch)
-                .frame(width: controlColumnWidth, alignment: .leading)
+        }
+    }
+
+    private func settingsRow<Control: View>(
+        title: String,
+        @ViewBuilder control: () -> Control
+    ) -> some View {
+        HStack(alignment: .center, spacing: 0) {
+            Text(title)
+                .font(.system(size: 13))
+            Spacer(minLength: 28)
+            control()
+                .frame(width: controlColumnWidth, alignment: .center)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }

@@ -50,7 +50,7 @@ cat > "$APP_DIR/Contents/Info.plist" <<PLIST
   <key>CFBundleExecutable</key>
   <string>Text Shot</string>
   <key>CFBundleIdentifier</key>
-  <string>com.premsathisha.textshot</string>
+  <string>com.textshot.app</string>
   <key>CFBundleInfoDictionaryVersion</key>
   <string>6.0</string>
   <key>CFBundleName</key>
@@ -76,14 +76,14 @@ if [[ -n "${APPLE_DEVELOPER_ID_APP:-}" ]]; then
     --options runtime \
     --timestamp \
     --sign "$APPLE_DEVELOPER_ID_APP" \
-    --identifier "com.premsathisha.textshot" \
+    --identifier "com.textshot.app" \
     "$APP_DIR"
 else
   codesign \
     --force \
     --deep \
     --sign - \
-    --identifier "com.premsathisha.textshot" \
+    --identifier "com.textshot.app" \
     "$APP_DIR"
 fi
 
