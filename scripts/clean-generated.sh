@@ -25,7 +25,6 @@ if [[ "${REMOVE_NODE_MODULES:-0}" == "1" ]]; then
   rm -rf -- "node_modules"
 fi
 
-find . -maxdepth 1 -type d -name '(A Document Being Saved By swift-build*' -exec rm -rf -- {} +
-find . -maxdepth 1 -type d -name '(A Document Being Saved By swift-test*' -exec rm -rf -- {} +
+find . -maxdepth 1 -type d -name '(A Document Being Saved By swift-*' -exec rm -rf -- {} +
 
 echo "Removed generated artifacts and caches."

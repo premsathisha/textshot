@@ -1,114 +1,102 @@
-import Carbon
+import AppKit
+import Carbon.HIToolbox
 import Foundation
+import KeyboardShortcuts
+
+extension KeyboardShortcuts.Name {
+    static let globalCaptureHotkey = Self("globalCaptureHotkey")
+}
+
+typealias AppHotkeyShortcut = KeyboardShortcuts.Shortcut
 
 protocol HotkeyManaging: AnyObject {
     var onHotkeyPressed: (() -> Void)? { get set }
+    var activeShortcut: AppHotkeyShortcut? { get }
+
     @discardableResult
-    func apply(accelerator: String) throws -> String
+    func apply(shortcut: AppHotkeyShortcut?) throws -> AppHotkeyShortcut?
+
+    @discardableResult
+    func resetToDefault() throws -> AppHotkeyShortcut
 }
 
-enum HotkeyApplyError: LocalizedError {
+protocol HotkeyRecorderBindingProviding: AnyObject {
+    var recorderName: KeyboardShortcuts.Name { get }
+    var recorderAvailabilityIssue: String? { get }
+    var onShortcutChanged: ((AppHotkeyShortcut?) -> Void)? { get set }
+
+    func validateForRecorder(_ shortcut: AppHotkeyShortcut?) throws
+}
+
+enum HotkeyApplyError: LocalizedError, Equatable {
     case invalidShortcut
-    case registrationFailed
 
     var errorDescription: String? {
         switch self {
         case .invalidShortcut:
-            return "Shortcut key is not supported."
-        case .registrationFailed:
-            return "Shortcut is already in use by another app."
+            return "Unsupported shortcut. Use one or more modifiers, or an F-key."
         }
     }
 }
 
-extension HotkeyManager: HotkeyManaging {}
+enum HotkeyManager {
+    static let defaultShortcut = AppHotkeyShortcut(.two, modifiers: [.shift, .command])
 
-final class HotkeyManager {
-    private let hotkeySignature = OSType(0x54534854)
-    private var eventHandlerRef: EventHandlerRef?
-    private var activeHotkeyRef: EventHotKeyRef?
-
-    private(set) var activeAccelerator: String?
-    var onHotkeyPressed: (() -> Void)?
-
-    init() {
-        installEventHandler()
+    @MainActor
+    static func displayString(for shortcut: AppHotkeyShortcut?) -> String {
+        shortcut?.description ?? "Not set"
     }
 
-    deinit {
-        if let activeHotkeyRef {
-            UnregisterEventHotKey(activeHotkeyRef)
+    static func validateNoModifierRule(_ shortcut: AppHotkeyShortcut?) throws {
+        guard let shortcut else {
+            return
         }
-    }
 
-    @discardableResult
-    func apply(accelerator: String) throws -> String {
-        guard let components = ShortcutCodec.carbonHotkeyComponents(from: accelerator) else {
+        guard isAllowedNoModifierShortcut(shortcut) || hasAnyModifier(shortcut) else {
             throw HotkeyApplyError.invalidShortcut
         }
-
-        let normalized = accelerator.trimmingCharacters(in: .whitespacesAndNewlines)
-        if activeAccelerator == normalized {
-            return normalized
-        }
-
-        var nextRef: EventHotKeyRef?
-        let hotkeyID = EventHotKeyID(signature: hotkeySignature, id: 1)
-        let status = RegisterEventHotKey(
-            components.keyCode,
-            components.modifiers,
-            hotkeyID,
-            GetApplicationEventTarget(),
-            OptionBits(0),
-            &nextRef
-        )
-
-        guard status == noErr, let nextRef else {
-            throw HotkeyApplyError.registrationFailed
-        }
-
-        if let activeHotkeyRef {
-            UnregisterEventHotKey(activeHotkeyRef)
-        }
-
-        activeHotkeyRef = nextRef
-        activeAccelerator = normalized
-        return normalized
     }
 
-    private func installEventHandler() {
-        var eventSpec = EventTypeSpec(eventClass: OSType(kEventClassKeyboard), eventKind: UInt32(kEventHotKeyPressed))
-
-        let unmanagedSelf = Unmanaged.passUnretained(self)
-        let callback: EventHandlerUPP = { _, event, userData in
-            guard let userData, let event else { return noErr }
-            let manager = Unmanaged<HotkeyManager>.fromOpaque(userData).takeUnretainedValue()
-
-            var hotkeyID = EventHotKeyID()
-            let status = GetEventParameter(
-                event,
-                EventParamName(kEventParamDirectObject),
-                EventParamType(typeEventHotKeyID),
-                nil,
-                MemoryLayout<EventHotKeyID>.size,
-                nil,
-                &hotkeyID
-            )
-
-            if status == noErr, hotkeyID.signature == manager.hotkeySignature {
-                manager.onHotkeyPressed?()
-            }
-
-            return noErr
+    static func macOS15OptionGuardrailMessage(for shortcut: AppHotkeyShortcut?) -> String? {
+        guard let shortcut else {
+            return nil
         }
 
-        InstallEventHandler(
-            GetApplicationEventTarget(),
-            callback,
-            1,
-            &eventSpec,
-            unmanagedSelf.toOpaque(),
-            &eventHandlerRef
-        )
+        let modifiers = shortcut.modifiers.intersection([.command, .option, .control, .shift])
+        guard modifiers.contains(.option) else {
+            return nil
+        }
+
+        let hasCommandOrControl = modifiers.contains(.command) || modifiers.contains(.control)
+        guard !hasCommandOrControl else {
+            return nil
+        }
+
+        return "Option-only shortcuts may not fire reliably on macOS 15. Prefer adding Command or Control."
+    }
+
+    private static func hasAnyModifier(_ shortcut: AppHotkeyShortcut) -> Bool {
+        let modifiers = shortcut.modifiers.intersection([.command, .option, .control, .shift])
+        return !modifiers.isEmpty
+    }
+
+    private static func isAllowedNoModifierShortcut(_ shortcut: AppHotkeyShortcut) -> Bool {
+        let modifiers = shortcut.modifiers.intersection([.command, .option, .control, .shift])
+        guard modifiers.isEmpty else {
+            return false
+        }
+
+        return isFunctionKey(shortcut)
+    }
+
+    static func isFunctionKey(_ shortcut: AppHotkeyShortcut) -> Bool {
+        let fKeyRawValues: Set<Int> = [
+            Int(kVK_F1), Int(kVK_F2), Int(kVK_F3), Int(kVK_F4), Int(kVK_F5),
+            Int(kVK_F6), Int(kVK_F7), Int(kVK_F8), Int(kVK_F9), Int(kVK_F10),
+            Int(kVK_F11), Int(kVK_F12), Int(kVK_F13), Int(kVK_F14), Int(kVK_F15),
+            Int(kVK_F16), Int(kVK_F17), Int(kVK_F18), Int(kVK_F19), Int(kVK_F20)
+        ]
+
+        return fKeyRawValues.contains(shortcut.carbonKeyCode)
     }
 }

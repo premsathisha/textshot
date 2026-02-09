@@ -29,5 +29,7 @@ This project is a native menu bar macOS utility for fast region OCR. It is now a
 ## Version Policy
 
 - Native cutover release: `1.0.0`
-- Future updates: bump minor only (`1.1.0`, `1.2.0`, ...)
-- No patch versions unless explicitly requested
+- Every new DMG must bump the version.
+- Version progression is patchless and follows:
+  - `1.0.0` -> `1.1.0` -> ... -> `1.9.0` -> `2.0.0` -> ...
+- Keep only the latest DMG and checksum in `release/`; delete older release artifacts.

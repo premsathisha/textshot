@@ -3,14 +3,20 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SETTINGS_DIR="$ROOT_DIR/native/settings-app"
-ARM_BUILD="$SETTINGS_DIR/.build/arm64"
-X64_BUILD="$SETTINGS_DIR/.build/x86_64"
+# Use /tmp for SwiftPM scratch builds to avoid occasional sqlite build.db I/O errors under Documents/iCloud.
+ARM_BUILD="/tmp/text-shot-settings-build-arm64"
+X64_BUILD="/tmp/text-shot-settings-build-x86_64"
 OUT_DIR="$ROOT_DIR/bin"
 APP_DIR="$OUT_DIR/Text Shot.app"
 MODULE_CACHE_DIR="$ROOT_DIR/.swiftpm-module-cache"
 CLANG_CACHE_DIR="$ROOT_DIR/.clang-module-cache"
 APP_VERSION="$(awk -F'\"' '/\"version\"/ {print $4; exit}' "$ROOT_DIR/package.json")"
 BUILD_NUMBER="$(date +%Y%m%d%H%M)"
+
+fail() {
+  echo "build-settings-app: $*" >&2
+  exit 1
+}
 
 mkdir -p "$OUT_DIR"
 mkdir -p "$MODULE_CACHE_DIR" "$CLANG_CACHE_DIR"
@@ -20,6 +26,8 @@ export CLANG_MODULE_CACHE_PATH="$CLANG_CACHE_DIR"
 
 swift build --package-path "$SETTINGS_DIR" -c release --arch arm64 --scratch-path "$ARM_BUILD"
 swift build --package-path "$SETTINGS_DIR" -c release --arch x86_64 --scratch-path "$X64_BUILD"
+
+rm -rf -- "$APP_DIR"
 
 lipo -create \
   "$ARM_BUILD/release/text-shot" \

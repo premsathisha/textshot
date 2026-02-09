@@ -9,9 +9,15 @@ let package = Package(
     products: [
         .executable(name: "text-shot", targets: ["TextShotSettings"])
     ],
+    dependencies: [
+        .package(path: "Vendor/KeyboardShortcuts")
+    ],
     targets: [
         .executableTarget(
             name: "TextShotSettings",
+            dependencies: [
+                "KeyboardShortcuts"
+            ],
             path: "Sources/TextShotSettings",
             linkerSettings: [
                 .linkedFramework("SwiftUI"),

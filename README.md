@@ -84,7 +84,7 @@ Cutover release (`1.0.0`):
 npm run release:native:cutover
 ```
 
-Future releases (minor only):
+Release:
 
 ```bash
 npm run release:native:minor
@@ -93,9 +93,11 @@ npm run release:native:minor
 Rules:
 
 - First native release is `1.0.0`
-- Future releases bump minor only (`1.1.0`, `1.2.0`, ...)
+- Every new DMG bumps version automatically
+- Progression: `1.0.0` -> `1.1.0` -> ... -> `1.9.0` -> `2.0.0` -> ...
 - DMG output name: `Text Shot-<version>.dmg`
-- Copied to `release/` with SHA-256 checksum
+- Stored in `release/` with SHA-256 checksum
+- `release/` retains only the latest DMG + checksum
 
 Notarization env vars (optional but recommended):
 

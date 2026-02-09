@@ -1,34 +1,31 @@
 import AppKit
 import Foundation
+import KeyboardShortcuts
 import SwiftUI
 
 @MainActor
 final class AppController {
     private let settingsStore: SettingsStoreV2
-    private let hotkeyManager: HotkeyManaging
-    private let shortcutAvailabilityChecker = ShortcutAvailabilityChecker()
+    private let hotkeyManager: any HotkeyManaging & HotkeyRecorderBindingProviding
     private let captureService: CaptureServing
     private let ocrService: OCRServing
     private let clipboardService: ClipboardWriting
-    private let autoPasteService: AutoPasting
-    private let permissionPrompts: PermissionPrompting
     private let launchAtLoginService: LaunchAtLoginApplying
     private let toastPresenter: ToastPresenting
     private let screenCapturePermissionService: ScreenCapturePermissionChecking
 
     private var settingsWindowController: NSWindowController?
+    private var settingsViewModel: SettingsViewModel?
     private var currentSettings: AppSettingsV2
     private var lastCopiedText = ""
     private var isCaptureInFlight = false
 
     init(
         settingsStore: SettingsStoreV2,
-        hotkeyManager: HotkeyManaging = HotkeyManager(),
+        hotkeyManager: any HotkeyManaging & HotkeyRecorderBindingProviding = HotkeyBindingController(),
         captureService: CaptureServing = CaptureService(),
         ocrService: OCRServing = OCRService(),
         clipboardService: ClipboardWriting = ClipboardService(),
-        autoPasteService: AutoPasting = AutoPasteService(),
-        permissionPrompts: PermissionPrompting = PermissionPromptService(),
         launchAtLoginService: LaunchAtLoginApplying = LaunchAtLoginService(),
         toastPresenter: ToastPresenting? = nil,
         screenCapturePermissionService: ScreenCapturePermissionChecking = ScreenCapturePermissionService(),
@@ -39,8 +36,6 @@ final class AppController {
         self.captureService = captureService
         self.ocrService = ocrService
         self.clipboardService = clipboardService
-        self.autoPasteService = autoPasteService
-        self.permissionPrompts = permissionPrompts
         self.launchAtLoginService = launchAtLoginService
         self.toastPresenter = toastPresenter ?? ToastPresenter()
         self.screenCapturePermissionService = screenCapturePermissionService
@@ -52,36 +47,44 @@ final class AppController {
             }
         }
 
+        hotkeyManager.onShortcutChanged = { [weak self] shortcut in
+            Task { @MainActor [weak self] in
+                self?.syncHotkeyMirror(to: shortcut)
+                self?.settingsViewModel?.syncHotkeyDisplay(with: shortcut)
+            }
+        }
+
         if installStartupStateOnInit {
             installStartupState()
         }
     }
 
     func openSettings() {
+        if let existingWindow = settingsWindowController?.window {
+            existingWindow.makeKeyAndOrderFront(nil)
+            NSApp.activate(ignoringOtherApps: true)
+            return
+        }
+
         let model = SettingsViewModel(
             initialSettings: currentSettings.editable,
-            onSave: { [weak self] editable in
+            hotkeyController: hotkeyManager,
+            onApplySettings: { [weak self] editable in
                 guard let self else { return .failure(.message("Settings unavailable")) }
                 return self.saveSettings(editable)
-            },
-            onApplyHotkey: { [weak self] hotkey in
-                guard let self else { return .failure(.message("Settings unavailable")) }
-                return self.applyHotkeyFromSettings(hotkey)
-            },
-            onResetHotkey: { [weak self] in
-                guard let self else { return .failure(.message("Settings unavailable")) }
-                return self.applyHotkeyFromSettings(AppSettingsV2.defaults.hotkey)
             }
         )
+        settingsViewModel = model
 
         let contentView = SettingsView().environmentObject(model)
         let hosting = NSHostingController(rootView: contentView)
 
         let window = NSWindow(contentViewController: hosting)
-        window.title = "Text Shot Settings"
+        window.title = "Settings"
         window.styleMask = [.titled, .closable, .miniaturizable]
-        window.setContentSize(NSSize(width: 520, height: 340))
+        window.setContentSize(NSSize(width: 420, height: 270))
         window.center()
+        window.isReleasedWhenClosed = false
 
         let controller = NSWindowController(window: window)
         settingsWindowController = controller
@@ -95,34 +98,46 @@ final class AppController {
         }
     }
 
+    @discardableResult
+    func applyShortcutForTesting(_ shortcut: AppHotkeyShortcut?) -> Result<AppHotkeyShortcut?, SettingsActionError> {
+        applyHotkeyFromSettings(shortcut)
+    }
+
     private func installStartupState() {
         launchAtLoginService.apply(enabled: currentSettings.launchAtLogin)
 
-        do {
-            _ = try hotkeyManager.apply(accelerator: currentSettings.hotkey)
-        } catch {
-            // Startup fallback only if there is no active hotkey yet.
-            if (try? hotkeyManager.apply(accelerator: AppSettingsV2.defaults.hotkey)) != nil {
-                currentSettings.hotkey = AppSettingsV2.defaults.hotkey
-                _ = try? settingsStore.save(currentSettings)
-            }
+        if case .none = hotkeyManager.activeShortcut {
+            _ = try? hotkeyManager.resetToDefault()
         }
+
+        syncHotkeyMirrorToActiveShortcut()
     }
 
-    private func applyHotkeyFromSettings(_ hotkey: String) -> Result<String, SettingsActionError> {
-        switch shortcutAvailabilityChecker.availability(for: hotkey) {
-        case .available:
-            do {
-                let normalized = try hotkeyManager.apply(accelerator: hotkey)
-                currentSettings.hotkey = normalized
-                _ = try settingsStore.save(currentSettings)
-                return .success(normalized)
-            } catch {
-                return .failure(.message(error.localizedDescription))
-            }
+    private func activeShortcutOrDefault() -> AppHotkeyShortcut {
+        hotkeyManager.activeShortcut ?? HotkeyManager.defaultShortcut
+    }
 
-        case .unavailable(let message):
-            return .failure(.message(message))
+    private func syncHotkeyMirrorToActiveShortcut() {
+        syncHotkeyMirror(to: activeShortcutOrDefault())
+    }
+
+    private func syncHotkeyMirror(to shortcut: AppHotkeyShortcut?) {
+        let display = HotkeyManager.displayString(for: shortcut)
+        if currentSettings.hotkey == display {
+            return
+        }
+
+        currentSettings.hotkey = display
+        _ = try? settingsStore.save(currentSettings)
+    }
+
+    private func applyHotkeyFromSettings(_ shortcut: AppHotkeyShortcut?) -> Result<AppHotkeyShortcut?, SettingsActionError> {
+        do {
+            let active = try hotkeyManager.apply(shortcut: shortcut)
+            syncHotkeyMirror(to: active)
+            return .success(active)
+        } catch {
+            return .failure(.message(error.localizedDescription))
         }
     }
 
@@ -139,49 +154,14 @@ final class AppController {
         }
     }
 
-    private func shouldThrottlePermissionPrompt(lastAt: Int) -> Bool {
-        permissionPrompts.shouldThrottle(lastShownAt: lastAt)
-    }
-
-    private func updatePermissionTimestamp(screenRecording: Bool) {
-        let now = Int(Date().timeIntervalSince1970 * 1000)
-        if screenRecording {
-            currentSettings.lastPermissionPromptAt = now
-        } else {
-            currentSettings.lastAccessibilityPromptAt = now
-        }
-        _ = try? settingsStore.save(currentSettings)
-    }
-
     private func showToastIfEnabled(_ message: String) {
         if currentSettings.showConfirmation {
             toastPresenter.show(message)
         }
     }
 
-    private func shouldSuggestMoveToApplications() -> Bool {
-        let bundleURL = Bundle.main.bundleURL.resolvingSymlinksInPath().standardizedFileURL
-        let path = bundleURL.path
-
-        if path.hasPrefix("/Applications/") {
-            return false
-        }
-
-        let userApplications = NSHomeDirectory() + "/Applications/"
-        if path.hasPrefix(userApplications) {
-            return false
-        }
-
-        return true
-    }
-
     private func showScreenRecordingPromptIfNeeded() {
-        guard !shouldThrottlePermissionPrompt(lastAt: currentSettings.lastPermissionPromptAt) else {
-            return
-        }
-
-        updatePermissionTimestamp(screenRecording: true)
-        permissionPrompts.showScreenRecordingPrompt(includeMoveToApplicationsHint: shouldSuggestMoveToApplications())
+        // macOS already shows the system Screen Recording permission dialog.
     }
 
     func runCaptureFlow() async {
@@ -232,15 +212,6 @@ final class AppController {
 
             clipboardService.write(text)
             lastCopiedText = text
-
-            if currentSettings.autoPaste {
-                let pasted = autoPasteService.paste()
-                if !pasted && !shouldThrottlePermissionPrompt(lastAt: currentSettings.lastAccessibilityPromptAt) {
-                    updatePermissionTimestamp(screenRecording: false)
-                    permissionPrompts.showAccessibilityPrompt()
-                }
-            }
-
             showToastIfEnabled("Copied!")
         } catch {
             showToastIfEnabled("Error")

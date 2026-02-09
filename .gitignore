@@ -1,5 +1,6 @@
 /node_modules/
 /dist/
+/dist-native/
 /release/
 /bin/
 /resources/bin/
@@ -7,6 +8,9 @@
 /.clang-module-cache/
 /native/ocr-helper/.build/
 /native/settings-app/.build/
+/native/settings-app/Package.resolved
 /(A Document Being Saved By swift-build*)
+/(A Document Being Saved By swift-test*)
+/.tmp.driveupload/
 .DS_Store
 *.log

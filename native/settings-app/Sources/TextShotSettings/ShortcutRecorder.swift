@@ -1,55 +1,26 @@
-import AppKit
+import KeyboardShortcuts
 import SwiftUI
 
-struct ShortcutRecorder: NSViewRepresentable {
-    let onShortcut: (String) -> Void
-    let onInvalid: () -> Void
+struct KeyboardShortcutField: View {
+    let hotkeyController: any HotkeyManaging & HotkeyRecorderBindingProviding
+    @Binding var shortcut: AppHotkeyShortcut?
+    let onError: (String) -> Void
+    let onWarning: (String?) -> Void
 
-    func makeNSView(context: Context) -> ShortcutCaptureView {
-        let view = ShortcutCaptureView()
-        view.onShortcut = onShortcut
-        view.onInvalid = onInvalid
-        view.requestFocus()
-        return view
-    }
-
-    func updateNSView(_ nsView: ShortcutCaptureView, context: Context) {
-        nsView.onShortcut = onShortcut
-        nsView.onInvalid = onInvalid
-        nsView.requestFocus()
-    }
-}
-
-final class ShortcutCaptureView: NSView {
-    var onShortcut: ((String) -> Void)?
-    var onInvalid: (() -> Void)?
-
-    override var acceptsFirstResponder: Bool { true }
-
-    override func viewDidMoveToWindow() {
-        super.viewDidMoveToWindow()
-        requestFocus()
-    }
-
-    func requestFocus() {
-        DispatchQueue.main.async { [weak self] in
-            guard let self else { return }
-            guard let window = self.window else { return }
-            NSApp.activate(ignoringOtherApps: true)
-            if window.isMiniaturized {
-                window.deminiaturize(nil)
+    var body: some View {
+        KeyboardShortcuts.Recorder(
+            shortcut: $shortcut,
+            onChange: { newValue in
+                do {
+                    let applied = try hotkeyController.apply(shortcut: newValue)
+                    onError("")
+                    onWarning(HotkeyManager.macOS15OptionGuardrailMessage(for: applied))
+                } catch {
+                    shortcut = hotkeyController.activeShortcut
+                    onWarning(nil)
+                    onError(error.localizedDescription)
+                }
             }
-            window.makeKeyAndOrderFront(nil)
-            window.makeFirstResponder(self)
-        }
-    }
-
-    override func keyDown(with event: NSEvent) {
-        if let accelerator = ShortcutCodec.accelerator(from: event) {
-            onShortcut?(accelerator)
-            return
-        }
-
-        onInvalid?()
+        )
     }
 }

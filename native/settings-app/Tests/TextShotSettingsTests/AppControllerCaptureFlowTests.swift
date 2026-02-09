@@ -1,13 +1,52 @@
+import AppKit
 import Foundation
+import ShortcutRecorder
 import Testing
 @testable import TextShotSettings
 
-private final class MockHotkeyManager: HotkeyManaging {
+private final class MockHotkeyController: HotkeyManaging, HotkeyRecorderBindingProviding {
     var onHotkeyPressed: (() -> Void)?
+    var onShortcutChanged: ((Shortcut) -> Void)?
+    var activeShortcut: Shortcut?
+    var applyError: Error?
+    var resetError: Error?
+
+    let defaultsController: NSUserDefaultsController = .shared
+    let defaultsKeyPath = HotkeyManager.defaultsKeyPath
+    let bindingOptions: [NSBindingOption: Any] = [
+        .valueTransformerName: NSValueTransformerName.keyedUnarchiveFromDataTransformerName
+    ]
+    var recorderAvailabilityIssue: String?
+
+    init() {}
 
     @discardableResult
-    func apply(accelerator: String) throws -> String {
-        accelerator
+    func apply(shortcut: Shortcut) throws -> Shortcut {
+        if let applyError {
+            throw applyError
+        }
+
+        activeShortcut = shortcut
+        onShortcutChanged?(shortcut)
+        return shortcut
+    }
+
+    @discardableResult
+    func resetToDefault() throws -> Shortcut {
+        if let resetError {
+            throw resetError
+        }
+
+        activeShortcut = HotkeyManager.defaultShortcut
+        onShortcutChanged?(HotkeyManager.defaultShortcut)
+        return HotkeyManager.defaultShortcut
+    }
+
+    func validateForRecorder(_ shortcut: Shortcut) throws {
+        if let applyError {
+            throw applyError
+        }
+        try HotkeyManager.validateNoModifierRule(shortcut)
     }
 }
 
@@ -47,34 +86,6 @@ private final class MockClipboardService: ClipboardWriting {
 
     func write(_ text: String) {
         writes.append(text)
-    }
-}
-
-private final class MockAutoPasteService: AutoPasting {
-    var shouldSucceed = true
-
-    func paste() -> Bool {
-        shouldSucceed
-    }
-}
-
-private final class MockPermissionPrompts: PermissionPrompting {
-    var throttleResult = false
-    private(set) var screenPromptCount = 0
-    private(set) var accessibilityPromptCount = 0
-    private(set) var moveHintValues: [Bool] = []
-
-    func shouldThrottle(lastShownAt: Int) -> Bool {
-        throttleResult
-    }
-
-    func showScreenRecordingPrompt(includeMoveToApplicationsHint: Bool) {
-        screenPromptCount += 1
-        moveHintValues.append(includeMoveToApplicationsHint)
-    }
-
-    func showAccessibilityPrompt() {
-        accessibilityPromptCount += 1
     }
 }
 
@@ -118,24 +129,22 @@ private final class MockScreenCapturePermissionService: ScreenCapturePermissionC
 private func makeSettingsStore() throws -> (SettingsStoreV2, URL) {
     let tempDir = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(UUID().uuidString)
     try FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
-    let fileURL = tempDir.appendingPathComponent("settings-v2.json")
+    let fileURL = tempDir.appendingPathComponent("settings-v3.json")
     return (SettingsStoreV2(fileURL: fileURL), tempDir)
 }
 
 @MainActor
 @Test
-func appControllerDeniedPreflightShowsScreenPromptWithoutCapture() async throws {
+func appControllerDeniedPreflightSkipsCapture() async throws {
     let (store, tempDir) = try makeSettingsStore()
     defer { try? FileManager.default.removeItem(at: tempDir) }
 
-    let hotkeys = MockHotkeyManager()
+    let hotkeys = MockHotkeyController()
     let capture = MockCaptureService(
         result: CaptureResult(canceled: false, path: nil, error: "unexpected", failureReason: .unexpected(message: "unexpected"))
     )
     let ocr = MockOCRService(text: nil)
     let clipboard = MockClipboardService()
-    let autoPaste = MockAutoPasteService()
-    let prompts = MockPermissionPrompts()
     let launch = MockLaunchAtLoginService()
     let toast = MockToastPresenter()
     let screenPerms = MockScreenCapturePermissionService(preflightResult: false, requestResult: false)
@@ -146,8 +155,6 @@ func appControllerDeniedPreflightShowsScreenPromptWithoutCapture() async throws 
         captureService: capture,
         ocrService: ocr,
         clipboardService: clipboard,
-        autoPasteService: autoPaste,
-        permissionPrompts: prompts,
         launchAtLoginService: launch,
         toastPresenter: toast,
         screenCapturePermissionService: screenPerms,
@@ -158,17 +165,16 @@ func appControllerDeniedPreflightShowsScreenPromptWithoutCapture() async throws 
 
     #expect(screenPerms.requestCount == 1)
     #expect(capture.callCount == 0)
-    #expect(prompts.screenPromptCount == 1)
     #expect(toast.messages.isEmpty)
 }
 
 @MainActor
 @Test
-func appControllerCaptureToolFailureDoesNotShowScreenPrompt() async throws {
+func appControllerCaptureToolFailureShowsCaptureFailedToast() async throws {
     let (store, tempDir) = try makeSettingsStore()
     defer { try? FileManager.default.removeItem(at: tempDir) }
 
-    let hotkeys = MockHotkeyManager()
+    let hotkeys = MockHotkeyController()
     let capture = MockCaptureService(
         result: CaptureResult(
             canceled: false,
@@ -179,8 +185,6 @@ func appControllerCaptureToolFailureDoesNotShowScreenPrompt() async throws {
     )
     let ocr = MockOCRService(text: nil)
     let clipboard = MockClipboardService()
-    let autoPaste = MockAutoPasteService()
-    let prompts = MockPermissionPrompts()
     let launch = MockLaunchAtLoginService()
     let toast = MockToastPresenter()
     let screenPerms = MockScreenCapturePermissionService(preflightResult: true, requestResult: true)
@@ -191,8 +195,6 @@ func appControllerCaptureToolFailureDoesNotShowScreenPrompt() async throws {
         captureService: capture,
         ocrService: ocr,
         clipboardService: clipboard,
-        autoPasteService: autoPaste,
-        permissionPrompts: prompts,
         launchAtLoginService: launch,
         toastPresenter: toast,
         screenCapturePermissionService: screenPerms,
@@ -201,7 +203,6 @@ func appControllerCaptureToolFailureDoesNotShowScreenPrompt() async throws {
 
     await controller.runCaptureFlow()
 
-    #expect(prompts.screenPromptCount == 0)
     #expect(toast.messages == ["Capture failed"])
 }
 
@@ -214,7 +215,7 @@ func appControllerAuthorizedCaptureCopiesTextAndShowsCopiedToast() async throws 
     let tempImage = tempDir.appendingPathComponent("capture.png")
     try Data("stub".utf8).write(to: tempImage)
 
-    let hotkeys = MockHotkeyManager()
+    let hotkeys = MockHotkeyController()
     let capture = MockCaptureService(
         result: CaptureResult(
             canceled: false,
@@ -225,8 +226,6 @@ func appControllerAuthorizedCaptureCopiesTextAndShowsCopiedToast() async throws 
     )
     let ocr = MockOCRService(text: "Copied text")
     let clipboard = MockClipboardService()
-    let autoPaste = MockAutoPasteService()
-    let prompts = MockPermissionPrompts()
     let launch = MockLaunchAtLoginService()
     let toast = MockToastPresenter()
     let screenPerms = MockScreenCapturePermissionService(preflightResult: true, requestResult: true)
@@ -237,8 +236,6 @@ func appControllerAuthorizedCaptureCopiesTextAndShowsCopiedToast() async throws 
         captureService: capture,
         ocrService: ocr,
         clipboardService: clipboard,
-        autoPasteService: autoPaste,
-        permissionPrompts: prompts,
         launchAtLoginService: launch,
         toastPresenter: toast,
         screenCapturePermissionService: screenPerms,
@@ -249,6 +246,50 @@ func appControllerAuthorizedCaptureCopiesTextAndShowsCopiedToast() async throws 
 
     #expect(clipboard.writes == ["Copied text"])
     #expect(toast.messages == ["Copied!"])
-    #expect(prompts.screenPromptCount == 0)
     #expect(FileManager.default.fileExists(atPath: tempImage.path) == false)
+}
+
+@MainActor
+@Test
+func appControllerApplyShortcutReturnsErrorMessage() throws {
+    let (store, tempDir) = try makeSettingsStore()
+    defer { try? FileManager.default.removeItem(at: tempDir) }
+
+    let hotkeys = MockHotkeyController()
+    hotkeys.activeShortcut = HotkeyManager.defaultShortcut
+    hotkeys.applyError = HotkeyApplyError.conflict(message: "Shortcut is already in use.")
+
+    let capture = MockCaptureService(
+        result: CaptureResult(canceled: true, path: nil, error: nil, failureReason: nil)
+    )
+    let ocr = MockOCRService(text: nil)
+    let clipboard = MockClipboardService()
+    let launch = MockLaunchAtLoginService()
+    let toast = MockToastPresenter()
+    let screenPerms = MockScreenCapturePermissionService(preflightResult: true, requestResult: true)
+
+    let controller = AppController(
+        settingsStore: store,
+        hotkeyManager: hotkeys,
+        captureService: capture,
+        ocrService: ocr,
+        clipboardService: clipboard,
+        launchAtLoginService: launch,
+        toastPresenter: toast,
+        screenCapturePermissionService: screenPerms,
+        installStartupStateOnInit: false
+    )
+
+    let requested = Shortcut(keyEquivalent: "⌃⌥K")!
+    let result = controller.applyShortcutForTesting(requested)
+
+    switch result {
+    case .success:
+        Issue.record("Expected failure for apply error")
+    case .failure(let error):
+        #expect(error.displayMessage == "Shortcut is already in use.")
+    }
+
+    #expect(toast.messages.isEmpty)
+    #expect(hotkeys.activeShortcut?.isEqual(HotkeyManager.defaultShortcut) == true)
 }

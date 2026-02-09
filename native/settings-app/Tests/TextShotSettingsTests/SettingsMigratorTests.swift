@@ -3,7 +3,7 @@ import Testing
 @testable import TextShotSettings
 
 @Test
-func settingsMigratorImportsLegacyJsonIntoV2() throws {
+func settingsMigratorImportsLegacyJsonIntoV3() throws {
     let tempDir = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(UUID().uuidString)
     try FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
     defer { try? FileManager.default.removeItem(at: tempDir) }
@@ -32,11 +32,9 @@ func settingsMigratorImportsLegacyJsonIntoV2() throws {
     #expect(loaded.hotkey == "Control+Alt+K")
     #expect(loaded.showConfirmation == false)
     #expect(loaded.launchAtLogin)
-    #expect(loaded.autoPaste)
     #expect(loaded.lastPermissionPromptAt == 10)
-    #expect(loaded.lastAccessibilityPromptAt == 20)
-    #expect(loaded.schemaVersion == 2)
+    #expect(loaded.schemaVersion == AppSettingsV2.schemaVersionValue)
 
-    #expect(FileManager.default.fileExists(atPath: tempDir.appendingPathComponent("Text Shot/.migration-v2-done").path))
-    #expect(FileManager.default.fileExists(atPath: tempDir.appendingPathComponent("Text Shot/settings-v2.json").path))
+    #expect(FileManager.default.fileExists(atPath: tempDir.appendingPathComponent("Text Shot/.migration-v3-done").path))
+    #expect(FileManager.default.fileExists(atPath: tempDir.appendingPathComponent("Text Shot/settings-v3.json").path))
 }

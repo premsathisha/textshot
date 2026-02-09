@@ -13,18 +13,16 @@ private enum Bootstrap {
         let base = FileManager.default.homeDirectoryForCurrentUser
             .appendingPathComponent("Library/Application Support/Text Shot", isDirectory: true)
         try? FileManager.default.createDirectory(at: base, withIntermediateDirectories: true)
-        return base.appendingPathComponent("settings-v2.json")
+        return base.appendingPathComponent("settings-v3.json")
     }
 }
 
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
     private let controller = Bootstrap.appController()
-    private let relocator = AppRelocator()
     private var statusItem: NSStatusItem?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        relocator.promptToMoveIfNeeded()
         setupStatusItem()
     }
 
@@ -39,7 +37,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let menu = NSMenu()
         menu.addItem(withTitle: "Capture Text", action: #selector(captureText), keyEquivalent: "")
         menu.addItem(.separator())
-        menu.addItem(withTitle: "Settings...", action: #selector(openSettings), keyEquivalent: ",")
+        let settingsItem = NSMenuItem(title: "Settings...", action: #selector(openSettings), keyEquivalent: ",")
+        settingsItem.image = nil
+        settingsItem.onStateImage = nil
+        settingsItem.offStateImage = nil
+        settingsItem.mixedStateImage = nil
+        menu.addItem(settingsItem)
         menu.addItem(.separator())
         menu.addItem(withTitle: "Quit", action: #selector(quitApp), keyEquivalent: "q")
 

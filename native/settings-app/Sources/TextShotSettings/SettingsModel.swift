@@ -5,20 +5,16 @@ struct AppSettingsV2: Codable, Equatable {
     var hotkey: String
     var showConfirmation: Bool
     var launchAtLogin: Bool
-    var autoPaste: Bool
     var lastPermissionPromptAt: Int
-    var lastAccessibilityPromptAt: Int
 
-    static let schemaVersionValue = 2
+    static let schemaVersionValue = 3
 
     static let defaults = AppSettingsV2(
         schemaVersion: schemaVersionValue,
-        hotkey: "CommandOrControl+Shift+2",
+        hotkey: "⇧⌘2",
         showConfirmation: true,
         launchAtLogin: false,
-        autoPaste: false,
-        lastPermissionPromptAt: 0,
-        lastAccessibilityPromptAt: 0
+        lastPermissionPromptAt: 0
     )
 }
 
@@ -26,7 +22,6 @@ struct EditableSettings: Equatable {
     var hotkey: String
     var showConfirmation: Bool
     var launchAtLogin: Bool
-    var autoPaste: Bool
 }
 
 extension AppSettingsV2 {
@@ -34,8 +29,7 @@ extension AppSettingsV2 {
         EditableSettings(
             hotkey: hotkey,
             showConfirmation: showConfirmation,
-            launchAtLogin: launchAtLogin,
-            autoPaste: autoPaste
+            launchAtLogin: launchAtLogin
         )
     }
 
@@ -43,7 +37,6 @@ extension AppSettingsV2 {
         hotkey = editable.hotkey
         showConfirmation = editable.showConfirmation
         launchAtLogin = editable.launchAtLogin
-        autoPaste = editable.autoPaste
     }
 }
 
@@ -113,13 +106,13 @@ struct SettingsMigrator {
     func prepareStore() throws -> SettingsStoreV2 {
         let appSupport = try appSupportDirectory()
         let settingsDirectory = appSupport.appendingPathComponent("Text Shot", isDirectory: true)
-        let targetURL = settingsDirectory.appendingPathComponent("settings-v2.json")
-        let markerURL = settingsDirectory.appendingPathComponent(".migration-v2-done")
+        let targetURL = settingsDirectory.appendingPathComponent("settings-v3.json")
+        let markerURL = settingsDirectory.appendingPathComponent(".migration-v3-done")
 
         try fm.createDirectory(at: settingsDirectory, withIntermediateDirectories: true)
 
         if !fm.fileExists(atPath: targetURL.path) {
-            let migrated = migrateLegacySettingsIfAvailable() ?? .defaults
+            let migrated = migrateSettingsIfAvailable(settingsDirectory: settingsDirectory) ?? .defaults
             let store = SettingsStoreV2(fileURL: targetURL, fileManager: fm)
             _ = try store.save(migrated)
         }
@@ -142,8 +135,9 @@ struct SettingsMigrator {
         return url
     }
 
-    private func migrateLegacySettingsIfAvailable() -> AppSettingsV2? {
-        let candidates = legacySettingsCandidates()
+    private func migrateSettingsIfAvailable(settingsDirectory: URL) -> AppSettingsV2? {
+        let candidates = settingsCandidates(settingsDirectory: settingsDirectory)
+
         for url in candidates where fm.fileExists(atPath: url.path) {
             guard
                 let data = try? Data(contentsOf: url),
@@ -157,28 +151,32 @@ struct SettingsMigrator {
                 hotkey: readString(payload, "hotkey") ?? AppSettingsV2.defaults.hotkey,
                 showConfirmation: readBool(payload, "showConfirmation") ?? AppSettingsV2.defaults.showConfirmation,
                 launchAtLogin: readBool(payload, "launchAtLogin") ?? AppSettingsV2.defaults.launchAtLogin,
-                autoPaste: readBool(payload, "autoPaste") ?? AppSettingsV2.defaults.autoPaste,
-                lastPermissionPromptAt: readInt(payload, "lastPermissionPromptAt") ?? 0,
-                lastAccessibilityPromptAt: readInt(payload, "lastAccessibilityPromptAt") ?? 0
+                lastPermissionPromptAt: readInt(payload, "lastPermissionPromptAt") ?? 0
             )
         }
 
         return nil
     }
 
-    private func legacySettingsCandidates() -> [URL] {
-        guard let appSupport = fm.urls(for: .applicationSupportDirectory, in: .userDomainMask).first else {
-            return []
+    private func settingsCandidates(settingsDirectory: URL) -> [URL] {
+        var candidates = [
+            settingsDirectory.appendingPathComponent("settings-v3.json"),
+            settingsDirectory.appendingPathComponent("settings-v2.json")
+        ]
+
+        if let appSupport = fm.urls(for: .applicationSupportDirectory, in: .userDomainMask).first {
+            candidates.append(appSupport.appendingPathComponent("Text Shot/settings.json"))
+            candidates.append(appSupport.appendingPathComponent("text-shot/settings.json"))
         }
 
-        return [
-            appSupport.appendingPathComponent("Text Shot/settings.json"),
-            appSupport.appendingPathComponent("text-shot/settings.json")
-        ]
+        return candidates
     }
 
     private func readString(_ payload: [String: Any], _ key: String) -> String? {
-        (payload[key] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard let value = (payload[key] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines), !value.isEmpty else {
+            return nil
+        }
+        return value
     }
 
     private func readBool(_ payload: [String: Any], _ key: String) -> Bool? {

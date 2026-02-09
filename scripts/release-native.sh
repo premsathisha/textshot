@@ -10,7 +10,6 @@ ARCHIVE_PATH="${ARCHIVE_PATH:-$ROOT_DIR/dist-native/TextShot.xcarchive}"
 EXPORT_PATH="${EXPORT_PATH:-$ROOT_DIR/dist-native/export}"
 EXPORT_OPTIONS_PLIST="${EXPORT_OPTIONS_PLIST:-$ROOT_DIR/build/export-options.native.plist}"
 RELEASE_DIR="${RELEASE_DIR:-$ROOT_DIR/release}"
-DOWNLOADS_DIR="${DOWNLOADS_DIR:-$HOME/Downloads}"
 APP_NAME="${APP_NAME:-Text Shot}"
 
 BUMP_MINOR=0
@@ -24,7 +23,7 @@ Usage: bash scripts/release-native.sh [options]
 
 Options:
   --set-version <x.y.z>         Set version explicitly
-  --bump-minor                  Bump version x.y.z -> x.(y+1).0
+  --bump-minor                  Legacy flag (version bump is now default)
   --cutover-1-0-0               Set version to 1.0.0
   --skip-notarize               Skip notarytool submit + staple
   -h, --help                    Show this help
@@ -40,9 +39,14 @@ validate_semver() {
   [[ "$1" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]
 }
 
-bump_minor_zero_patch() {
+bump_release_version() {
   local major minor patch
   IFS='.' read -r major minor patch <<<"$1"
+  if (( minor >= 9 )); then
+    echo "$((major + 1)).0.0"
+    return
+  fi
+
   echo "${major}.$((minor + 1)).0"
 }
 
@@ -98,10 +102,10 @@ TARGET_VERSION="$CURRENT_VERSION"
 if [[ -n "$SET_VERSION" ]]; then
   validate_semver "$SET_VERSION" || fail "Invalid --set-version value: $SET_VERSION"
   TARGET_VERSION="$SET_VERSION"
-elif [[ "$BUMP_MINOR" -eq 1 ]]; then
-  TARGET_VERSION="$(bump_minor_zero_patch "$CURRENT_VERSION")"
 elif [[ "$CUTOVER_1_0_0" -eq 1 ]]; then
   TARGET_VERSION="1.0.0"
+else
+  TARGET_VERSION="$(bump_release_version "$CURRENT_VERSION")"
 fi
 
 if [[ "$TARGET_VERSION" != "$CURRENT_VERSION" ]]; then
@@ -170,13 +174,11 @@ hdiutil create \
   -format UDZO \
   "$DMG_PATH"
 
+find "$RELEASE_DIR" -maxdepth 1 -type f -name "$APP_NAME-*.dmg" -delete
+find "$RELEASE_DIR" -maxdepth 1 -type f -name "$APP_NAME-*.dmg.sha256" -delete
+
 cp -f "$DMG_PATH" "$RELEASE_DIR/$DMG_NAME"
 shasum -a 256 "$RELEASE_DIR/$DMG_NAME" > "$RELEASE_DIR/$DMG_NAME.sha256"
-
-if [[ -d "$DOWNLOADS_DIR" ]]; then
-  cp -f "$DMG_PATH" "$DOWNLOADS_DIR/$DMG_NAME"
-  echo "Copied DMG to Downloads: $DOWNLOADS_DIR/$DMG_NAME"
-fi
 
 echo "Release artifact ready: $RELEASE_DIR/$DMG_NAME"
 echo "Checksum ready: $RELEASE_DIR/$DMG_NAME.sha256"
