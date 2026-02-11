@@ -1,6 +1,6 @@
 # Text Shot
 
-Text Shot is a lightweight macOS OCR utility for fast text extraction directly from your screen. It runs entirely on-device and is built for speed, simplicity, and keyboard-driven workflows. Requires macOS Screen Recording permission to capture selected regions, with no data collection, no network calls, and no accounts required.
+Text Shot is a lightweight macOS screenshot-to-text utility that lets you capture any screen region and instantly extract text using on-device OCR. It runs entirely on-device and is built for speed, simplicity, and keyboard-driven workflows. Requires macOS Screen Recording permission to capture selected regions, with no data collection, no network calls, and no accounts required.
 
 ## Screenshot
 
