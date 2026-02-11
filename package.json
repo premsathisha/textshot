@@ -4,7 +4,7 @@
   "version": "2.4.0",
   "description": "Fast macOS background OCR utility",
   "author": "Prem Sathisha Etagi",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "scripts": {
     "clean": "bash scripts/clean-generated.sh",
     "build": "bash scripts/build-settings-app.sh",

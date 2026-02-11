@@ -20,3 +20,9 @@ Flow: global hotkey -> region capture -> Vision OCR (local) -> clipboard.
 - macOS 13+
 - Xcode command-line tools (`swift`, `xcodebuild`, `codesign`, `hdiutil`)
 - Node.js + npm
+
+## Privacy
+
+- OCR runs locally using Apple Vision.
+- App captures are temporary and are cleaned up after use.
+- No runtime networking is required for normal capture and OCR flow.

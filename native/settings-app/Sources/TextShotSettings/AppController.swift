@@ -197,7 +197,7 @@ final class AppController {
         }
 
         defer {
-            try? FileManager.default.removeItem(atPath: path)
+            CaptureTempStore.shared.removeCaptureFile(atPath: path)
         }
 
         do {

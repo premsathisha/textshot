@@ -21,8 +21,7 @@ struct CaptureResult: Equatable {
 
 final class CaptureService {
     func captureRegion() async -> CaptureResult {
-        let output = FileManager.default.temporaryDirectory
-            .appendingPathComponent("text-shot-capture-\(Date().timeIntervalSince1970)-\(UUID().uuidString).png")
+        let output = CaptureTempStore.shared.makeCaptureFileURL()
 
         let process = Process()
         process.executableURL = URL(fileURLWithPath: "/usr/sbin/screencapture")
@@ -50,7 +49,7 @@ final class CaptureService {
             return CaptureResult(canceled: false, path: output.path, error: nil, failureReason: nil)
         }
 
-        try? FileManager.default.removeItem(at: output)
+        CaptureTempStore.shared.removeCaptureFile(atPath: output.path)
 
         return resultForFailure(terminationStatus: process.terminationStatus, stderr: stderr)
     }

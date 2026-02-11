@@ -22,8 +22,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private let controller = Bootstrap.appController()
     private let appRelocator = AppRelocator()
     private var statusItem: NSStatusItem?
+    private var willTerminateObserver: NSObjectProtocol?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        CaptureTempStore.shared.prepareForLaunch()
+        willTerminateObserver = NotificationCenter.default.addObserver(
+            forName: NSApplication.willTerminateNotification,
+            object: nil,
+            queue: nil
+        ) { _ in
+            CaptureTempStore.shared.cleanupTrackedFiles()
+        }
         setupStatusItem()
         appRelocator.promptToMoveIfNeeded()
     }

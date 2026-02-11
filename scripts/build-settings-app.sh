@@ -10,6 +10,8 @@ OUT_DIR="$ROOT_DIR/bin"
 APP_DIR="$OUT_DIR/Text Shot.app"
 APP_ICON_SRC="$ROOT_DIR/assets/app_icon.icns"
 APP_ICON_NAME="app_icon.icns"
+THIRD_PARTY_NOTICES_SRC="$ROOT_DIR/ThirdPartyNotices.txt"
+THIRD_PARTY_NOTICES_NAME="ThirdPartyNotices.txt"
 MODULE_CACHE_DIR="$ROOT_DIR/.swiftpm-module-cache"
 CLANG_CACHE_DIR="$ROOT_DIR/.clang-module-cache"
 APP_VERSION="$(awk -F'\"' '/\"version\"/ {print $4; exit}' "$ROOT_DIR/package.json")"
@@ -43,6 +45,8 @@ cp -f "$OUT_DIR/text-shot" "$APP_DIR/Contents/MacOS/Text Shot"
 chmod +x "$APP_DIR/Contents/MacOS/Text Shot"
 [[ -f "$APP_ICON_SRC" ]] || fail "Missing app icon: $APP_ICON_SRC"
 cp -f "$APP_ICON_SRC" "$APP_DIR/Contents/Resources/$APP_ICON_NAME"
+[[ -f "$THIRD_PARTY_NOTICES_SRC" ]] || fail "Missing third-party notices file: $THIRD_PARTY_NOTICES_SRC"
+cp -f "$THIRD_PARTY_NOTICES_SRC" "$APP_DIR/Contents/Resources/$THIRD_PARTY_NOTICES_NAME"
 
 cat > "$APP_DIR/Contents/Info.plist" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
