@@ -12,3 +12,5 @@
 /.tmp.driveupload/
 .DS_Store
 *.log
+
+AGENTS.md
