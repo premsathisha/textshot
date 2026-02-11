@@ -20,10 +20,12 @@ private enum Bootstrap {
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
     private let controller = Bootstrap.appController()
+    private let appRelocator = AppRelocator()
     private var statusItem: NSStatusItem?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         setupStatusItem()
+        appRelocator.promptToMoveIfNeeded()
     }
 
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
@@ -32,7 +34,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     private func setupStatusItem() {
         let statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
-        statusItem.button?.title = "Text Shot"
+        statusItem.button?.title = "TS"
 
         let menu = NSMenu()
         menu.addItem(withTitle: "Capture Text", action: #selector(captureText), keyEquivalent: "")

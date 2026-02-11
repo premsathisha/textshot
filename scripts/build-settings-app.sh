@@ -8,6 +8,8 @@ ARM_BUILD="/tmp/text-shot-settings-build-arm64"
 X64_BUILD="/tmp/text-shot-settings-build-x86_64"
 OUT_DIR="$ROOT_DIR/bin"
 APP_DIR="$OUT_DIR/Text Shot.app"
+APP_ICON_SRC="$ROOT_DIR/assets/app_icon.icns"
+APP_ICON_NAME="app_icon.icns"
 MODULE_CACHE_DIR="$ROOT_DIR/.swiftpm-module-cache"
 CLANG_CACHE_DIR="$ROOT_DIR/.clang-module-cache"
 APP_VERSION="$(awk -F'\"' '/\"version\"/ {print $4; exit}' "$ROOT_DIR/package.json")"
@@ -39,6 +41,8 @@ chmod +x "$OUT_DIR/text-shot"
 mkdir -p "$APP_DIR/Contents/MacOS" "$APP_DIR/Contents/Resources"
 cp -f "$OUT_DIR/text-shot" "$APP_DIR/Contents/MacOS/Text Shot"
 chmod +x "$APP_DIR/Contents/MacOS/Text Shot"
+[[ -f "$APP_ICON_SRC" ]] || fail "Missing app icon: $APP_ICON_SRC"
+cp -f "$APP_ICON_SRC" "$APP_DIR/Contents/Resources/$APP_ICON_NAME"
 
 cat > "$APP_DIR/Contents/Info.plist" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
@@ -53,6 +57,8 @@ cat > "$APP_DIR/Contents/Info.plist" <<PLIST
   <string>com.textshot.app</string>
   <key>CFBundleInfoDictionaryVersion</key>
   <string>6.0</string>
+  <key>CFBundleIconFile</key>
+  <string>app_icon.icns</string>
   <key>CFBundleName</key>
   <string>Text Shot</string>
   <key>CFBundlePackageType</key>
