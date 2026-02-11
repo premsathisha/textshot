@@ -46,13 +46,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         statusItem.button?.title = "TS"
 
         let menu = NSMenu()
+        menu.showsStateColumn = false
         menu.addItem(withTitle: "Capture Text", action: #selector(captureText), keyEquivalent: "")
         menu.addItem(.separator())
         let settingsItem = NSMenuItem(title: "Settings...", action: #selector(openSettings), keyEquivalent: ",")
+        settingsItem.keyEquivalentModifierMask = [.command]
         settingsItem.image = nil
-        settingsItem.onStateImage = nil
-        settingsItem.offStateImage = nil
-        settingsItem.mixedStateImage = nil
         menu.addItem(settingsItem)
         menu.addItem(.separator())
         menu.addItem(withTitle: "Quit", action: #selector(quitApp), keyEquivalent: "q")
